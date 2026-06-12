@@ -1,6 +1,7 @@
 package ch.immi.pension;
 
-import ch.immi.pension.data.Rebalancing;
+import ch.immi.pension.data.AccountRebalancing;
+import ch.immi.pension.data.PotsRebalancing;
 import ch.immi.pension.javafx.StandartGripPane;
 import ch.immi.pension.persistence.Data;
 import ch.immi.pension.javafx.NumberTextField;
@@ -457,9 +458,13 @@ public class Application extends javafx.application.Application {
     private double getProfit(String oldBalanceTxt, String newBalanceTxt) {
         double oldValue = getInt(oldBalanceTxt);
         double newValue = getInt(newBalanceTxt);
+        return getProfit(oldValue, newValue);
+    }
+
+    private double getProfit(double oldBalance, double newBalance) {
         double profit = 0d;
-        if (oldValue > 0) {
-            profit = (newValue - oldValue) / oldValue * 100;
+        if (oldBalance > 0) {
+            profit = (newBalance - oldBalance) / oldBalance * 100;
         }
         return profit;
     }
@@ -476,37 +481,47 @@ public class Application extends javafx.application.Application {
         return value;
     }
 
-    private void showText(Rebalancing rebalancing) {
-        if (rebalancing.getFrom3To1() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 1: %s CHF\n", getDecimalFormatter().format(rebalancing.getFrom3To1())));
+    private void showText(PotsRebalancing potsRebalancing, AccountRebalancing accountRebalancing) {
+        if (potsRebalancing.getFrom3To1() > 0) {
+            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To1())));
         }
-        if (rebalancing.getFrom3To2() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 2: %s CHF\n", getDecimalFormatter().format(rebalancing.getFrom3To2())));
+        if (potsRebalancing.getFrom3To2() > 0) {
+            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 2: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To2())));
         }
-        if (rebalancing.getFrom2To1() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 2 -> Konto 1: %s CHF\n", getDecimalFormatter().format(rebalancing.getFrom2To1())));
+        if (potsRebalancing.getFrom2To1() > 0) {
+            txtAusgabeGross.setText(String.format("Konto 2 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom2To1())));
         }
-        if (rebalancing.getFrom1To3() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 1 -> Konto 3: %s CHF\n", getDecimalFormatter().format(rebalancing.getFrom1To3())));
+        if (potsRebalancing.getFrom1To3() > 0) {
+            txtAusgabeGross.setText(String.format("Konto 1 -> Konto 3: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom1To3())));
         }
 
     }
 
     // Functionalities
     private void doAnalysis() {
+        // Do pot rebalancing
         double profit2 = getProfit(txtLastKonto2.getText(), txtKonto2.getText());
-        double profit3 = getProfit(txtLastKonto3a.getText(), txtKonto3a.getText());
-        Rebalancer rebalancer = new Rebalancer(getInt(txtKonto1), getInt(txtKonto2), getInt(txtKonto3a), profit2, profit3);
-        rebalancer.setKonto1Params(getInt(txtKonto1Crit), getInt(txtKonto1Min));
-        rebalancer.setKonto2Params(getInt(txtKonto2Crit), getInt(txtKonto2Min), getInt(txtKonto2Max));
-        rebalancer.setKonto3Params(getInt(txtKonto3Plus10), getInt(txtKonto3Plus5), getInt(txtKonto3Min20), getInt(txtKonto3Min30));
-        Rebalancing rebalancing = rebalancer.rebalancing();
+        int lastKonto3 = getInt(txtLastKonto3a) + getInt(txtLastKonto3b);
+        int konto3 = getInt(txtKonto3a) + getInt(txtKonto3b);
+        double profit3 = getProfit(lastKonto3, konto3);
+
+        PotsRebalancer potsRebalancer = new PotsRebalancer(getInt(txtKonto1), getInt(txtKonto2), konto3, profit2, profit3);
+        potsRebalancer.setKonto1Params(getInt(txtKonto1Crit), getInt(txtKonto1Min));
+        potsRebalancer.setKonto2Params(getInt(txtKonto2Crit), getInt(txtKonto2Min), getInt(txtKonto2Max));
+        potsRebalancer.setKonto3Params(getInt(txtKonto3Plus10), getInt(txtKonto3Plus5), getInt(txtKonto3Min20), getInt(txtKonto3Min30));
+        PotsRebalancing potsRebalancing = potsRebalancer.rebalancing();
+
+        // Do account3 rebalancing
+        double profit3a = getProfit(txtLastKonto3a.getText(), txtKonto3a.getText());
+        double profit3b = getProfit(txtLastKonto3b.getText(), txtKonto3b.getText());
+        AccountRebalancing accountRebalancing = new AccountRebalancer(getInt(txtKonto3a), getInt(txtKonto3b), profit3a, profit3b).rebalance();
+
         // Do calculation
-        txtNewKonto1.setTextReformat(Integer.toString(getInt(txtKonto1) + rebalancing.getFrom2To1() + rebalancing.getFrom3To1() - rebalancing.getFrom1To3()));
-        txtNewKonto2.setTextReformat(Integer.toString(getInt(txtKonto2) + rebalancing.getFrom3To2() - rebalancing.getFrom2To1()));
-        txtNewKonto3a.setTextReformat(Integer.toString(getInt(txtKonto3a) + rebalancing.getFrom1To3() - rebalancing.getFrom3To1() - rebalancing.getFrom3To2()));
-        txtNewKonto3b.setTextReformat(Integer.toString(getInt(txtKonto3b) + rebalancing.getFrom1To3() - rebalancing.getFrom3To1() - rebalancing.getFrom3To2()));
-        showText(rebalancing);
+        txtNewKonto1.setTextReformat(Integer.toString(getInt(txtKonto1) + potsRebalancing.getFrom2To1() + potsRebalancing.getFrom3To1() - potsRebalancing.getFrom1To3()));
+        txtNewKonto2.setTextReformat(Integer.toString(getInt(txtKonto2) + potsRebalancing.getFrom3To2() - potsRebalancing.getFrom2To1()));
+        txtNewKonto3a.setTextReformat(Integer.toString(getInt(txtKonto3a) + potsRebalancing.getFrom1To3() - potsRebalancing.getFrom3To1() - potsRebalancing.getFrom3To2()));
+        txtNewKonto3b.setTextReformat(Integer.toString(getInt(txtKonto3b) + potsRebalancing.getFrom1To3() - potsRebalancing.getFrom3To1() - potsRebalancing.getFrom3To2()));
+        showText(potsRebalancing, accountRebalancing);
     }
 
     private void doHistory() {

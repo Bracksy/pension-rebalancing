@@ -1,19 +1,10 @@
 package ch.immi.pension.data;
 
-public class Rebalancing {
-    private int konto1;
-    private int konto2;
-    private int konto3;
+public class PotsRebalancing {
     private int from1To3 = 0;
     private int from2To1 = 0;
     private int from3To1 = 0;
     private int from3To2 = 0;
-
-    public Rebalancing(int konto1, int konto2, int konto3) {
-        this.konto1 = konto1;
-        this.konto2 = konto2;
-        this.konto3 = konto3;
-    }
 
     public int getFrom1To3() {
         return from1To3;
@@ -45,17 +36,5 @@ public class Rebalancing {
 
     public void setFrom3To2(int from3To2) {
         this.from3To2 = from3To2;
-    }
-
-    public int getKonto1() {
-        return konto1;
-    }
-
-    public int getKonto2() {
-        return konto2;
-    }
-
-    public int getKonto3() {
-        return konto3;
     }
 }

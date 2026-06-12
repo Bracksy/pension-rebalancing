@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.immi.pension</groupId>
-    <artifactId>rebalancing</artifactId>
+    <artifactId>potsRebalancing</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>rebalancing</name>
+    <name>potsRebalancing</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>ch.immi.pension.rebalancing/ch.immi.pension.Application
+                            <mainClass>ch.immi.pension.potsRebalancing/ch.immi.pension.Application
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
