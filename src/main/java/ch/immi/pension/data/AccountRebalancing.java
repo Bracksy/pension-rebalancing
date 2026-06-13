@@ -1,19 +1,19 @@
 package ch.immi.pension.data;
 
 public class AccountRebalancing {
-    private final int konto3a;
-    private final int konto3b;
+    private final int konto3aChange;
+    private final int konto3bChange;
 
-    public AccountRebalancing(int konto3a, int konto3b) {
-        this.konto3a = konto3a;
-        this.konto3b = konto3b;
+    public AccountRebalancing(int konto3aChange, int konto3bChange) {
+        this.konto3aChange = konto3aChange;
+        this.konto3bChange = konto3bChange;
     }
 
-    public int getKonto3a() {
-        return konto3a;
+    public int getKonto3aChange() {
+        return konto3aChange;
     }
 
-    public int getKonto3b() {
-        return konto3b;
+    public int getKonto3bChange() {
+        return konto3bChange;
     }
 }

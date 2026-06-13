@@ -59,36 +59,59 @@ public class PotsRebalancer {
     }
 
     private void step1_checkKonto1(PotsRebalancing potsRebalancing) {
-        int minAmount = konto1Min - konto1;
+        int kto1MinAmount = konto1 < konto1Min? konto1Min - konto1: 0;
+        int kto1MinAmount2 = konto1 < (konto1Min - 10000)? konto1Min - konto1 - 10000: 0;
+        int kto1CriAmount = konto1 < konto1Cri? konto1Cri - konto1: 0;
+        int amountFrom3 = profit3 > 0? (int)(konto3 * profit3 / 100): 0;
         if (konto1 < konto1Cri) {
-            if (profit2 > 0 || konto2 - minAmount > konto2Min) {
-                potsRebalancing.setFrom2To1(minAmount);
+            if (konto2 - kto1MinAmount > konto2Cri) {
+                potsRebalancing.setFrom2To1Min(kto1MinAmount, konto2);
+            } else if (konto2 - kto1MinAmount2 > konto2Cri) {
+                potsRebalancing.setFrom2To1Min(kto1MinAmount2, konto2);
+            } else if (konto2 - kto1CriAmount > konto2Cri || konto3 == 0) {
+                potsRebalancing.setFrom2To1Min(kto1CriAmount, konto2);
             } else {
-                potsRebalancing.setFrom3To1(minAmount);
+                if (profit3 < 2) {
+                    potsRebalancing.setFrom3To1Min(kto1CriAmount, konto3);
+                } else if (profit3 < 3) {
+                    potsRebalancing.setFrom3To1Min(kto1MinAmount2, konto3);
+                } else {
+                    potsRebalancing.setFrom3To1Min(kto1MinAmount, konto3);
+                }
             }
         } else if (konto1 < konto1Min) {
-            if (profit2 > 0) {
-                potsRebalancing.setFrom2To1(minAmount);
-            } else if (profit3 > 0) {
-                int amount = (int) (konto3 * profit3 / 100);
-                potsRebalancing.setFrom3To1(Math.max(amount, minAmount));
+            if (konto2 - kto1MinAmount > konto2Cri) {
+                potsRebalancing.setFrom2To1Min(kto1MinAmount, konto2);
+            } else if (konto2 - kto1CriAmount > konto2Cri) {
+                potsRebalancing.setFrom2To1Min(kto1CriAmount, konto2);
+            } else {
+                if (profit3 > 10) {
+                    potsRebalancing.setFrom3To1Min(amountFrom3, kto1MinAmount, konto3);
+                } else if (profit3 > 5) {
+                    potsRebalancing.setFrom3To1Min(amountFrom3, kto1MinAmount2, konto3);
+                } else if (profit3 > 0) {
+                    potsRebalancing.setFrom3To1Min(amountFrom3, kto1CriAmount, konto3);
+                }
             }
         }
     }
 
     private void step2_checkKonto2(PotsRebalancing potsRebalancing) {
         int newKonto2 = konto2 - potsRebalancing.getFrom2To1();
-        int minAmount = konto2Min - konto2;
+        int kto2MinAmount = newKonto2 < konto2Min? konto2Min - newKonto2: 0;
+        int kto2CriAmount = newKonto2 < konto2Cri? konto2Cri - newKonto2: 0;
+        int amountFrom3 = profit3 > 0? (int)(konto3 * profit3 / 100): 0;
         if (newKonto2 < konto2Cri) {
-            potsRebalancing.setFrom3To2(minAmount);
-        } else if (konto2 < konto2Min) {
-            if (profit3 > 0) {
-                int amount = (int) (konto3 * profit3 / 100);
-                potsRebalancing.setFrom3To2(Math.max(amount, minAmount));
+            potsRebalancing.setFrom3To2Min(kto2CriAmount, konto3);
+        } else if (newKonto2 < konto2Min) {
+            if (profit3 > 5) {
+                potsRebalancing.setFrom3To2Min(amountFrom3, kto2MinAmount, konto3);
+            } else if (profit3 > 0) {
+                potsRebalancing.setFrom3To2Min(amountFrom3, kto2CriAmount, konto3);
             }
         } else if (newKonto2 > konto2Max) {
-            int amount = newKonto2 - konto2Max;
-            potsRebalancing.setFrom2To1(potsRebalancing.getFrom2To1() + amount);
+            int amount = newKonto2 - konto2Max + potsRebalancing.getFrom2To1();
+            potsRebalancing.setFrom2To1Min(amount, konto2);
         }
     }
 
@@ -96,12 +119,12 @@ public class PotsRebalancer {
         if (profit3 > 10) {
             if (konto3Plus10 > 0) {
                 int amount = (int) (konto3 * (double) konto3Plus10 / 100);
-                potsRebalancing.setFrom3To2(Math.max(amount,  potsRebalancing.getFrom3To2()));
+                potsRebalancing.setFrom3To2Min(amount, potsRebalancing.getFrom3To2());
             }
         } else if (profit3 > 5) {
             if (konto3Plus5 > 0) {
                 int amount = (int) (konto3 * (double) konto3Plus5 / 100);
-                potsRebalancing.setFrom3To2(Math.max(amount,  potsRebalancing.getFrom3To2()));
+                potsRebalancing.setFrom3To2Min(amount, potsRebalancing.getFrom3To2());
             }
         } else if (profit3 < -30) {
             if (konto3Min30 > 0) {
@@ -121,25 +144,25 @@ public class PotsRebalancer {
     }
 
     private void summarizeFrom3To2To1(PotsRebalancing potsRebalancing) {
-        int from3to2 = potsRebalancing.getFrom3To2();
+        int from3To2 = potsRebalancing.getFrom3To2();
         int from2To1 = potsRebalancing.getFrom2To1();
         int from3To1 = potsRebalancing.getFrom3To1();
 
-        if (from3to2 > 0 && from3to2 < from2To1) {
-            from3To1 = from2To1 - from3to2;
-            from2To1 = from3to2;
-            from3to2 = 0;
-        } else if (from2To1 > 0 && from3to2 > from2To1) {
-            from3To1 = from3to2 - from2To1;
-            from3to2 = from2To1;
+        if (from3To2 > 0 && from3To2 < from2To1) {
+            from3To1 = from2To1 - from3To2;
+            from2To1 = from3To2;
+            from3To2 = 0;
+        } else if (from2To1 > 0 && from3To2 > from2To1) {
+            from3To2 = from3To2 - from2To1;
+            from3To1 = from2To1;
             from2To1 = 0;
-        } else if (from3to2 > 0 && from3to2 == from2To1){
-            from3To1 = from3to2;
-            from3to2 = 0;
+        } else if (from3To2 > 0 && from3To2 == from2To1){
+            from3To1 = from3To2;
+            from3To2 = 0;
             from2To1 = 0;
         }
         potsRebalancing.setFrom3To1(from3To1);
         potsRebalancing.setFrom2To1(from2To1);
-        potsRebalancing.setFrom3To2(from3to2);
+        potsRebalancing.setFrom3To2(from3To2);
     }
 }

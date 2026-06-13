@@ -23,6 +23,10 @@ public class Application extends javafx.application.Application {
 
     final Data data = Data.getInstance();
 
+    TitledBorder tbLetzerKontostand = new TitledBorder("Letzter Kontostand");
+    TitledBorder tbAktuellerKontostand = new TitledBorder("Aktueller Kontostand");
+    TitledBorder tbNeuerKontostand = new TitledBorder("Neuer Kontostand");
+
     NumberTextField txtLastKonto1 = new NumberTextField(80, 7);
     NumberTextField txtLastKonto2 = new NumberTextField(80, 7);
     NumberTextField txtLastKonto3a = new NumberTextField(80, 7);
@@ -134,9 +138,8 @@ public class Application extends javafx.application.Application {
     }
 
     private VBox letzterKontoStandBox() {
-        VBox linkerBereich = new TitledBorder("Letzter Kontostand");
-        linkerBereich.setPrefWidth(250);
-        linkerBereich.setAlignment(Pos.TOP_LEFT);
+        tbLetzerKontostand.setPrefWidth(250);
+        tbLetzerKontostand.setAlignment(Pos.TOP_LEFT);
 
         GridPane gridLinks = new StandartGripPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -167,15 +170,14 @@ public class Application extends javafx.application.Application {
 
         gridLinks.add(lblLastVerteilung, 1, 4);
 
-        linkerBereich.getChildren().add(gridLinks);
+        tbLetzerKontostand.getChildren().add(gridLinks);
 
-        return linkerBereich;
+        return tbLetzerKontostand;
     }
 
     private VBox aktuellerKontoStandBox() {
-        VBox linkerBereich = new TitledBorder("Aktueller Kontostand");
-        linkerBereich.setPrefWidth(250);
-        linkerBereich.setAlignment(Pos.TOP_LEFT);
+        tbAktuellerKontostand.setPrefWidth(250);
+        tbAktuellerKontostand.setAlignment(Pos.TOP_LEFT);
 
         GridPane gridLinks = new StandartGripPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -209,9 +211,9 @@ public class Application extends javafx.application.Application {
 
         gridLinks.add(lblVerteilung, 1, 4);
 
-        linkerBereich.getChildren().add(gridLinks);
+        tbAktuellerKontostand.getChildren().add(gridLinks);
 
-        return linkerBereich;
+        return tbAktuellerKontostand;
     }
 
     private VBox parameterBox() {
@@ -295,9 +297,8 @@ public class Application extends javafx.application.Application {
     }
 
     private VBox neuerKontoStandBox() {
-        VBox linkerBereich = new TitledBorder("Neuer Kontostand");
-        linkerBereich.setPrefWidth(250);
-        linkerBereich.setAlignment(Pos.TOP_LEFT);
+        tbNeuerKontostand.setPrefWidth(250);
+        tbNeuerKontostand.setAlignment(Pos.TOP_LEFT);
 
         GridPane gridLinks = new StandartGripPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -331,10 +332,10 @@ public class Application extends javafx.application.Application {
             doAccept();
         });
 
-        linkerBereich.getChildren().add(gridLinks);
-        linkerBereich.getChildren().add(btnHandle);
+        tbNeuerKontostand.getChildren().add(gridLinks);
+        tbNeuerKontostand.getChildren().add(btnHandle);
 
-        return linkerBereich;
+        return tbNeuerKontostand;
     }
 
     private void addAutoSaveListener(TextField textField) {
@@ -354,6 +355,7 @@ public class Application extends javafx.application.Application {
             if (newText != null && !newText.isEmpty()) {
                 recalculateProfit();
                 recalculateAccount3Percentage();
+                updateTitle();
             }
         });
     }
@@ -423,6 +425,20 @@ public class Application extends javafx.application.Application {
         txtRebalancingThreshold.setText(data.getString("txtRebalancingThreshold", "0"));
 
         recalculateProfit();
+        updateTitle();
+    }
+
+
+    private void updateTitle() {
+        int letzterKontostand = getInt(txtLastKonto1) + getInt(txtLastKonto2) + getInt(txtLastKonto3a) + getInt(txtLastKonto3b);
+        tbLetzerKontostand.setTitle(String.format("Letzter Kontostand: %s CHF",
+                getDecimalFormatter().format(letzterKontostand)));
+        int aktuellerKontostand = getInt(txtKonto1) + getInt(txtKonto2) + getInt(txtKonto3a) + getInt(txtKonto3b);
+        tbAktuellerKontostand.setTitle(String.format("Aktueller Kontostand: %s CHF",
+                getDecimalFormatter().format(aktuellerKontostand)));
+        int neuerKontostand = getInt(txtNewKonto1) + getInt(txtNewKonto2) + getInt(txtNewKonto3a) + getInt(txtNewKonto3b);
+        tbNeuerKontostand.setTitle(String.format("Neuer Kontostand: %s CHF",
+                getDecimalFormatter().format(neuerKontostand)));
     }
 
     private void recalculateProfit() {
@@ -482,19 +498,26 @@ public class Application extends javafx.application.Application {
     }
 
     private void showText(PotsRebalancing potsRebalancing, AccountRebalancing accountRebalancing) {
+        String ausgabeText = "";
         if (potsRebalancing.getFrom3To1() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To1())));
+            ausgabeText += String.format("Konto 3 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To1()));
         }
         if (potsRebalancing.getFrom3To2() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 3 -> Konto 2: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To2())));
+            ausgabeText += String.format("Konto 3 -> Konto 2: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom3To2()));
         }
         if (potsRebalancing.getFrom2To1() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 2 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom2To1())));
+            ausgabeText += String.format("Konto 2 -> Konto 1: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom2To1()));
         }
         if (potsRebalancing.getFrom1To3() > 0) {
-            txtAusgabeGross.setText(String.format("Konto 1 -> Konto 3: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom1To3())));
+            ausgabeText += String.format("Konto 1 -> Konto 3: %s CHF\n", getDecimalFormatter().format(potsRebalancing.getFrom1To3()));
         }
-
+        if (accountRebalancing.getKonto3aChange() > 0) {
+            ausgabeText += String.format("Konto 3a: %s CHF\n", getDecimalFormatter().format(accountRebalancing.getKonto3aChange()));
+        }
+        if (accountRebalancing.getKonto3bChange() > 0) {
+            ausgabeText += String.format("Konto 3b: %s CHF\n", getDecimalFormatter().format(accountRebalancing.getKonto3bChange()));
+        }
+        txtAusgabeGross.setText(ausgabeText);
     }
 
     // Functionalities
@@ -512,15 +535,15 @@ public class Application extends javafx.application.Application {
         PotsRebalancing potsRebalancing = potsRebalancer.rebalancing();
 
         // Do account3 rebalancing
-        double profit3a = getProfit(txtLastKonto3a.getText(), txtKonto3a.getText());
-        double profit3b = getProfit(txtLastKonto3b.getText(), txtKonto3b.getText());
-        AccountRebalancing accountRebalancing = new AccountRebalancer(getInt(txtKonto3a), getInt(txtKonto3b), profit3a, profit3b).rebalance();
+        AccountRebalancer accountRebalancer = new AccountRebalancer(getInt(txtKonto3a), getInt(txtKonto3b));
+        accountRebalancer.setParams(getInt(txtRebalancing3aPercent), getInt(txtRebalancing3bPercent), getInt(txtRebalancingThreshold));
+        AccountRebalancing accountRebalancing = accountRebalancer.rebalance(potsRebalancing.getFrom3To1()+potsRebalancing.getFrom3To2()-potsRebalancing.getFrom1To3());
 
         // Do calculation
         txtNewKonto1.setTextReformat(Integer.toString(getInt(txtKonto1) + potsRebalancing.getFrom2To1() + potsRebalancing.getFrom3To1() - potsRebalancing.getFrom1To3()));
         txtNewKonto2.setTextReformat(Integer.toString(getInt(txtKonto2) + potsRebalancing.getFrom3To2() - potsRebalancing.getFrom2To1()));
-        txtNewKonto3a.setTextReformat(Integer.toString(getInt(txtKonto3a) + potsRebalancing.getFrom1To3() - potsRebalancing.getFrom3To1() - potsRebalancing.getFrom3To2()));
-        txtNewKonto3b.setTextReformat(Integer.toString(getInt(txtKonto3b) + potsRebalancing.getFrom1To3() - potsRebalancing.getFrom3To1() - potsRebalancing.getFrom3To2()));
+        txtNewKonto3a.setTextReformat(Integer.toString(getInt(txtKonto3a) + accountRebalancing.getKonto3aChange()));
+        txtNewKonto3b.setTextReformat(Integer.toString(getInt(txtKonto3b) + accountRebalancing.getKonto3bChange()));
         showText(potsRebalancing, accountRebalancing);
     }
 

@@ -6,7 +6,9 @@ import javafx.scene.layout.VBox;
 
 public class TitledBorder extends VBox {
 
-    public TitledBorder(String titel) {
+    Label lblTitle = new Label();
+
+    public TitledBorder(String title) {
         // 1. Die Hauptbox für den Rahmen
         super(10);
         setStyle("-fx-border-color: #ababab; " +
@@ -16,20 +18,24 @@ public class TitledBorder extends VBox {
                 "-fx-padding: 15 10 10 10;");
 
         // 2. Das Label für den Titel
-        Label lblTitel = new Label(titel);
+        lblTitle.setText(title);
         // Wichtig: Eine feste Hintergrundfarbe (z.B. weiß) eingeben, damit die Linie darunter verschwindet
-        lblTitel.setStyle("-fx-font-weight: bold; -fx-background-color: white; -fx-padding: 0 5 0 5;");
+        lblTitle.setStyle("-fx-font-weight: bold; -fx-background-color: white; -fx-padding: 0 5 0 5;");
 
         // Wir positionieren das Label relativ zur Box
-        lblTitel.setTranslateY(-20); // Schiebt es hoch auf den Rahmen
-        lblTitel.setTranslateX(10);  // Schiebt es leicht nach rechts
+        lblTitle.setTranslateY(-20); // Schiebt es hoch auf den Rahmen
+        lblTitle.setTranslateX(10);  // Schiebt es leicht nach rechts
 
         // 3. Der Trick: Ein unsichtbarer Platzhalter
         // Weil das Label durch -25px nach oben verschoben wurde, klafft darunter eine Lücke.
         // Wir setzen einen negativen Abstand (Margin) für das NÄCHSTE Element, das in die Box kommt.
         // Dadurch rutscht dein GridPane magisch ganz nach oben an den Rand!
-        VBox.setMargin(lblTitel, new Insets(0, 0, -20, 0));
+        VBox.setMargin(lblTitle, new Insets(0, 0, -20, 0));
 
-        getChildren().add(lblTitel);
+        getChildren().add(lblTitle);
+    }
+
+    public void setTitle(String title) {
+        this.lblTitle.setText(title);
     }
 }
