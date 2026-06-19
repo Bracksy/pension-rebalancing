@@ -3,7 +3,7 @@ package ch.immi.pension.javafx;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
-public class FloatTextField extends IntegerTextField {
+public class FloatTextField extends AbstractTextField {
 
     public FloatTextField(int width, int length) {
         super(width, length);
@@ -17,16 +17,6 @@ public class FloatTextField extends IntegerTextField {
         return value;
     }
 
-    public void updateText(String input) {
-        try {
-            float floatValue = Float.parseFloat(input);
-            setText(getDecimalFormatter().format(floatValue));
-        } catch (NumberFormatException e) {
-            // Falls die Zahl zu gross für 'long' ist
-            clear();
-        }
-    }
-
     protected boolean matches(String newText) {
         return newText.matches("\\d+\\.?\\d?\\d?");
     }
@@ -36,5 +26,15 @@ public class FloatTextField extends IntegerTextField {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator('\'');
         return new DecimalFormat("#,###.##", symbols);
+    }
+
+    protected void updateText(String input) {
+        try {
+            float floatValue = Float.parseFloat(input);
+            setText(getDecimalFormatter().format(floatValue));
+        } catch (NumberFormatException e) {
+            // Falls die Zahl zu gross für 'long' ist
+            clear();
+        }
     }
 }
