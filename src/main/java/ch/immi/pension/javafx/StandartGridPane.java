@@ -4,9 +4,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 
-public class StandartGripPane extends GridPane {
+public class StandartGridPane extends GridPane {
 
-    public StandartGripPane() {
+    public StandartGridPane() {
         super();
         setAlignment(Pos.TOP_LEFT);
         setHgap(5);

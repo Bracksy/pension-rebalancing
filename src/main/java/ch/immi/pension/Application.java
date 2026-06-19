@@ -2,17 +2,13 @@ package ch.immi.pension;
 
 import ch.immi.pension.data.AccountRebalancing;
 import ch.immi.pension.data.PotsRebalancing;
-import ch.immi.pension.javafx.StandartGripPane;
+import ch.immi.pension.data.Threshold;
+import ch.immi.pension.javafx.*;
 import ch.immi.pension.persistence.Data;
-import ch.immi.pension.javafx.NumberTextField;
-import ch.immi.pension.javafx.TitledBorder;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -23,50 +19,57 @@ public class Application extends javafx.application.Application {
 
     final Data data = Data.getInstance();
 
-    TitledBorder tbLetzerKontostand = new TitledBorder("Letzter Kontostand");
-    TitledBorder tbAktuellerKontostand = new TitledBorder("Aktueller Kontostand");
-    TitledBorder tbNeuerKontostand = new TitledBorder("Neuer Kontostand");
+    private TitledBorder tbLetzerKontostand = new TitledBorder("Letzter Kontostand");
+    private TitledBorder tbAktuellerKontostand = new TitledBorder("Aktueller Kontostand");
+    private TitledBorder tbNeuerKontostand = new TitledBorder("Neuer Kontostand");
 
-    NumberTextField txtLastKonto1 = new NumberTextField(80, 7);
-    NumberTextField txtLastKonto2 = new NumberTextField(80, 7);
-    NumberTextField txtLastKonto3a = new NumberTextField(80, 7);
-    NumberTextField txtLastKonto3b = new NumberTextField(80, 7);
-    Label lblLastVerteilung = new Label("40%/60%");
+    private IntegerTextField txtLastKonto1 = new IntegerTextField(80, 7);
+    private IntegerTextField txtLastKonto2 = new IntegerTextField(80, 7);
+    private IntegerTextField txtLastKonto3a = new IntegerTextField(80, 7);
+    private IntegerTextField txtLastKonto3b = new IntegerTextField(80, 7);
+    private Label lblLastVerteilung = new Label("40%/60%");
 
-    NumberTextField txtKonto1 = new NumberTextField(80, 7);
-    NumberTextField txtKonto2 = new NumberTextField(80, 7);
-    NumberTextField txtKonto3a = new NumberTextField(80, 7);
-    NumberTextField txtKonto3b = new NumberTextField(80, 7);
-    Label lblVerteilung = new Label("40%/60%");
+    private IntegerTextField txtKonto1 = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto2 = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto3a = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto3b = new IntegerTextField(80, 7);
+    private Label lblVerteilung = new Label("40%/60%");
 
-    NumberTextField txtNewKonto1 = new NumberTextField(80, 7);
-    NumberTextField txtNewKonto2 = new NumberTextField(80, 7);
-    NumberTextField txtNewKonto3a = new NumberTextField(80, 7);
-    NumberTextField txtNewKonto3b = new NumberTextField(80, 7);
-    Label lblNewVerteilung = new Label("40%/60%");
+    private IntegerTextField txtNewKonto1 = new IntegerTextField(80, 7);
+    private IntegerTextField txtNewKonto2 = new IntegerTextField(80, 7);
+    private IntegerTextField txtNewKonto3a = new IntegerTextField(80, 7);
+    private IntegerTextField txtNewKonto3b = new IntegerTextField(80, 7);
+    private Label lblNewVerteilung = new Label("40%/60%");
 
-    Label lblProfit2 = new Label("5%");
-    Label lblProfit3a = new Label("5%");
-    Label lblProfit3b = new Label("5%");
+    private Label lblProfit2 = new Label("5%");
+    private Label lblProfit3a = new Label("5%");
+    private Label lblProfit3b = new Label("5%");
 
-    NumberTextField txtKonto1Crit = new NumberTextField(80, 7);
-    NumberTextField txtKonto1Min = new NumberTextField(80, 7);
-    NumberTextField txtKonto1Max = new NumberTextField(80, 7);
+    private IntegerTextField txtBezugJahr = new IntegerTextField(80, 7);
+    private Label lblBezugJahrPercentage = new Label("0%");
 
-    NumberTextField txtKonto2Crit = new NumberTextField(80, 7);
-    NumberTextField txtKonto2Min = new NumberTextField(80, 7);
-    NumberTextField txtKonto2Max = new NumberTextField(80, 7);
+    private IntegerTextField txtKonto1Init = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto1Min = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto1Opt = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto1Max = new IntegerTextField(80, 7);
 
-    NumberTextField txtKonto3Plus10 = new NumberTextField(40, 3);
-    NumberTextField txtKonto3Plus5 = new NumberTextField(40, 3);
-    NumberTextField txtKonto3Min20 = new NumberTextField(40, 3);
-    NumberTextField txtKonto3Min30 = new NumberTextField(40, 3);
+    private IntegerTextField txtKonto2Init = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto2Min = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto2Opt = new IntegerTextField(80, 7);
+    private IntegerTextField txtKonto2Max = new IntegerTextField(80, 7);
 
-    NumberTextField txtRebalancing3aPercent = new NumberTextField(40, 3);
-    NumberTextField txtRebalancing3bPercent = new NumberTextField(40, 3);
-    NumberTextField txtRebalancingThreshold = new NumberTextField(40, 3);
+    private IntegerTextField txtKonto3Init = new IntegerTextField(80, 7);
+    private IntegerTextField txtKontoInitTotal = new IntegerTextField(80, 7);
 
-    TextArea txtAusgabeGross = new TextArea();
+    private Label lblInit1Percentage = new Label("0%");
+    private Label lblInit2Percentage = new Label("0%");
+    private Label lblInit3Percentage = new Label("0%");
+
+    private IntegerTextField txtRebalancing3aPercent = new IntegerTextField(40, 3);
+    private IntegerTextField txtRebalancing3bPercent = new IntegerTextField(40, 3);
+    private IntegerTextField txtRebalancingThreshold = new IntegerTextField(40, 3);
+
+    private TextArea txtAusgabeGross = new TextArea();
 
     @Override
     public void start(Stage primaryStage) {
@@ -141,32 +144,32 @@ public class Application extends javafx.application.Application {
         tbLetzerKontostand.setPrefWidth(250);
         tbLetzerKontostand.setAlignment(Pos.TOP_LEFT);
 
-        GridPane gridLinks = new StandartGripPane();
+        GridPane gridLinks = new StandartGridPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         gridLinks.add(new Label("Konto 1:"), 0, 0);
         gridLinks.add(txtLastKonto1, 1, 0);
         gridLinks.add(new Label("CHF"), 2, 0);
         addAutoSaveListener(txtLastKonto1);
-        addRecalculateProfitListener(txtLastKonto1);
+        addUpdateListener(txtLastKonto1);
 
         gridLinks.add(new Label("Konto 2:"), 0, 1);
         gridLinks.add(txtLastKonto2, 1, 1);
         gridLinks.add(new Label("CHF"), 2, 1);
         addAutoSaveListener(txtLastKonto2);
-        addRecalculateProfitListener(txtLastKonto2);
+        addUpdateListener(txtLastKonto2);
 
         gridLinks.add(new Label("Konto 3a:"), 0, 2);
         gridLinks.add(txtLastKonto3a, 1, 2);
         gridLinks.add(new Label("CHF"), 2, 2);
         addAutoSaveListener(txtLastKonto3a);
-        addRecalculateProfitListener(txtLastKonto3a);
+        addUpdateListener(txtLastKonto3a);
 
         gridLinks.add(new Label("Konto 3b:"), 0, 3);
         gridLinks.add(txtLastKonto3b, 1, 3);
         gridLinks.add(new Label("CHF"), 2, 3);
         addAutoSaveListener(txtLastKonto3b);
-        addRecalculateProfitListener(txtLastKonto3b);
+        addUpdateListener(txtLastKonto3b);
 
         gridLinks.add(lblLastVerteilung, 1, 4);
 
@@ -176,38 +179,38 @@ public class Application extends javafx.application.Application {
     }
 
     private VBox aktuellerKontoStandBox() {
-        tbAktuellerKontostand.setPrefWidth(250);
+        tbAktuellerKontostand.setPrefWidth(300);
         tbAktuellerKontostand.setAlignment(Pos.TOP_LEFT);
 
-        GridPane gridLinks = new StandartGripPane();
+        GridPane gridLinks = new StandartGridPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         gridLinks.add(new Label("Konto 1:"), 0, 0);
         gridLinks.add(txtKonto1, 1, 0);
         gridLinks.add(new Label("CHF"), 2, 0);
         addAutoSaveListener(txtKonto1);
-        addRecalculateProfitListener(txtKonto1);
+        addUpdateListener(txtKonto1);
 
         gridLinks.add(new Label("Konto 2:"), 0, 1);
         gridLinks.add(txtKonto2, 1, 1);
         gridLinks.add(new Label("CHF"), 2, 1);
         gridLinks.add(lblProfit2, 4, 1);
         addAutoSaveListener(txtKonto2);
-        addRecalculateProfitListener(txtKonto2);
+        addUpdateListener(txtKonto2);
 
         gridLinks.add(new Label("Konto 3a:"), 0, 2);
         gridLinks.add(txtKonto3a, 1, 2);
         gridLinks.add(new Label("CHF"), 2, 2);
         gridLinks.add(lblProfit3a, 4, 2);
         addAutoSaveListener(txtKonto3a);
-        addRecalculateProfitListener(txtKonto3a);
+        addUpdateListener(txtKonto3a);
 
         gridLinks.add(new Label("Konto 3b:"), 0, 3);
         gridLinks.add(txtKonto3b, 1, 3);
         gridLinks.add(new Label("CHF"), 2, 3);
         gridLinks.add(lblProfit3b, 4, 3);
         addAutoSaveListener(txtKonto3b);
-        addRecalculateProfitListener(txtKonto3b);
+        addUpdateListener(txtKonto3b);
 
         gridLinks.add(lblVerteilung, 1, 4);
 
@@ -218,56 +221,63 @@ public class Application extends javafx.application.Application {
 
     private VBox parameterBox() {
         VBox rechterBereich = new TitledBorder("Parameter");
-        rechterBereich.setPrefWidth(450);
+        rechterBereich.setPrefWidth(500);
 
-        GridPane gridRechtsKonto12 = new StandartGripPane();
-        gridRechtsKonto12.add(new Label("krit"), 1, 0);
-        gridRechtsKonto12.add(new Label("min"), 2, 0);
-        gridRechtsKonto12.add(new Label("max"), 3, 0);
+        GridPane gridRechtsKonto12 = new StandartGridPane();
 
-        gridRechtsKonto12.add(new Label("Konto 1:"), 0, 1);
-        gridRechtsKonto12.add(txtKonto1Crit, 1, 1);
-        addAutoSaveListener(txtKonto1Crit);
-        gridRechtsKonto12.add(txtKonto1Min, 2, 1);
-        addAutoSaveListener(txtKonto1Min);
-        gridRechtsKonto12.add(txtKonto1Max, 3, 1);
-        addAutoSaveListener(txtKonto1Max);
+        gridRechtsKonto12.add(new Label("Bezug/Jahr:"), 0, 0);
+        gridRechtsKonto12.add(txtBezugJahr, 1, 0);
+        gridRechtsKonto12.add(new Label("CHF"), 2, 0);
+        gridRechtsKonto12.add(lblBezugJahrPercentage, 3, 0);
+        addAutoSaveListener(txtBezugJahr);
+        addUpdateListener(txtBezugJahr);
+        Tooltip tooltip = new Tooltip("Trinity-Studie: 4% optimal, 5% grenzwertig, 6% riskant");
+        lblBezugJahrPercentage.setTooltip(tooltip);
+        gridRechtsKonto12.add(new Label("init"), 1, 1);
+        gridRechtsKonto12.add(new Label("min"), 4, 1);
+        gridRechtsKonto12.add(new Label("opt"), 5, 1);
+        gridRechtsKonto12.add(new Label("max"), 6, 1);
 
-        gridRechtsKonto12.add(new Label("Konto 2:"), 0, 2);
-        gridRechtsKonto12.add(txtKonto2Crit, 1, 2);
-        addAutoSaveListener(txtKonto2Crit);
-        gridRechtsKonto12.add(txtKonto2Min, 2, 2);
-        addAutoSaveListener(txtKonto2Min);
-        gridRechtsKonto12.add(txtKonto2Max, 3, 2);
-        addAutoSaveListener(txtKonto2Max);
+        gridRechtsKonto12.add(new Label("Konto 1:"), 0, 2);
+        gridRechtsKonto12.add(txtKonto1Init, 1, 2);
+        gridRechtsKonto12.add(new Label("CHF"), 2, 2);
+        addAutoSaveListener(txtKonto1Init);
+        addUpdateListener(txtKonto1Init);
+        gridRechtsKonto12.add(lblInit1Percentage, 3, 2);
+        gridRechtsKonto12.add(txtKonto1Min, 4, 2);
+        txtKonto1Min.setReadonly(true);
+        gridRechtsKonto12.add(txtKonto1Opt, 5, 2);
+        txtKonto1Opt.setReadonly(true);
+        gridRechtsKonto12.add(txtKonto1Max, 6, 2);
+        txtKonto1Max.setReadonly(true);
 
-        VBox parameterKonto3Bereich = new TitledBorder("Konto 3");
-        GridPane gridRechtsKonto3 = new StandartGripPane();
+        gridRechtsKonto12.add(new Label("Konto 2:"), 0, 3);
+        gridRechtsKonto12.add(txtKonto2Init, 1, 3);
+        gridRechtsKonto12.add(new Label("CHF"), 2, 3);
+        addAutoSaveListener(txtKonto2Init);
+        addUpdateListener(txtKonto2Init);
+        gridRechtsKonto12.add(lblInit2Percentage, 3, 3);
+        gridRechtsKonto12.add(txtKonto2Min, 4, 3);
+        txtKonto2Min.setReadonly(true);
+        gridRechtsKonto12.add(txtKonto2Opt, 5, 3);
+        txtKonto2Opt.setReadonly(true);
+        gridRechtsKonto12.add(txtKonto2Max, 6, 3);
+        txtKonto2Max.setReadonly(true);
 
-        gridRechtsKonto3.add(new Label("+10%:"), 0, 0);
-        gridRechtsKonto3.add(txtKonto3Plus10, 1, 0);
-        gridRechtsKonto3.add(new Label("% sichern"), 2, 0);
-        addAutoSaveListener(txtKonto3Plus10);
+        gridRechtsKonto12.add(new Label("Konto 3:"), 0, 4);
+        gridRechtsKonto12.add(txtKonto3Init, 1, 4);
+        gridRechtsKonto12.add(new Label("CHF"), 2, 4);
+        addAutoSaveListener(txtKonto3Init);
+        addUpdateListener(txtKonto3Init);
+        gridRechtsKonto12.add(lblInit3Percentage, 3, 4);
 
-        gridRechtsKonto3.add(new Label("+5%:"), 0, 1);
-        gridRechtsKonto3.add(txtKonto3Plus5, 1, 1);
-        gridRechtsKonto3.add(new Label("% sichern"), 2, 1);
-        addAutoSaveListener(txtKonto3Plus5);
-
-        gridRechtsKonto3.add(new Label("-20%:"), 4, 0);
-        gridRechtsKonto3.add(txtKonto3Min20, 5, 0);
-        gridRechtsKonto3.add(new Label("% von Konto 1"), 6, 0);
-        addAutoSaveListener(txtKonto3Min20);
-
-        gridRechtsKonto3.add(new Label("-30%:"), 4, 1);
-        gridRechtsKonto3.add(txtKonto3Min30, 5, 1);
-        gridRechtsKonto3.add(new Label("% von Konto 1"), 6, 1);
-        addAutoSaveListener(txtKonto3Min30);
-
-        parameterKonto3Bereich.getChildren().add(gridRechtsKonto3);
+        gridRechtsKonto12.add(new Label("Gesamt:"), 0, 5);
+        gridRechtsKonto12.add(txtKontoInitTotal, 1, 5);
+        gridRechtsKonto12.add(new Label("CHF"), 2, 5);
+        txtKontoInitTotal.setReadonly(true);
 
         VBox parameterRebalancing3Bereich = new TitledBorder("Rebalancing 3a/3b");
-        GridPane gridRebalancing3 = new StandartGripPane();
+        GridPane gridRebalancing3 = new StandartGridPane();
 
         gridRebalancing3.add(new Label("Verteilung 3a/3b:"), 0, 0);
         gridRebalancing3.add(txtRebalancing3aPercent, 1, 0);
@@ -277,15 +287,14 @@ public class Application extends javafx.application.Application {
         gridRebalancing3.add(new Label("%"), 5, 0);
         addAutoSaveListener(txtRebalancing3aPercent);
         addAutoSaveListener(txtRebalancing3bPercent);
-
-        gridRebalancing3.add(new Label("Schwelle:"), 0, 1);
-        gridRebalancing3.add(txtRebalancingThreshold, 1, 1);
-        gridRebalancing3.add(new Label("%"), 2, 1);
+        gridRebalancing3.add(new Label("Schwelle:"), 6, 0);
+        gridRebalancing3.add(txtRebalancingThreshold, 7, 0);
+        gridRebalancing3.add(new Label("%"), 8, 0);
         addAutoSaveListener(txtRebalancingThreshold);
 
         parameterRebalancing3Bereich.getChildren().add(gridRebalancing3);
 
-        rechterBereich.getChildren().addAll(gridRechtsKonto12, parameterKonto3Bereich, parameterRebalancing3Bereich);
+        rechterBereich.getChildren().addAll(gridRechtsKonto12, parameterRebalancing3Bereich);
         return rechterBereich;
     }
 
@@ -300,7 +309,7 @@ public class Application extends javafx.application.Application {
         tbNeuerKontostand.setPrefWidth(250);
         tbNeuerKontostand.setAlignment(Pos.TOP_LEFT);
 
-        GridPane gridLinks = new StandartGripPane();
+        GridPane gridLinks = new StandartGridPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         gridLinks.add(new Label("Konto 1:"), 0, 0);
@@ -343,86 +352,121 @@ public class Application extends javafx.application.Application {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
                 // Code wird ausgeführt, wenn das Feld VERLASSEN wird
-                System.out.println("textField " + textField.getText() + " verlassen!");
                 storeValuesIntoRegistry();
             }
         });
     }
 
-    private void addRecalculateProfitListener(TextField textField) {
+    private void addUpdateListener(TextField textField) {
         textField.textProperty().addListener((observable, oldText, newText) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (newText != null && !newText.isEmpty()) {
                 recalculateProfit();
                 recalculateAccount3Percentage();
+                recalculateInitPercentage();
+                recalculateBezugJahrPercentage();
                 updateTitle();
+                updateTotal();
             }
         });
     }
 
+    // Functionalities
+    private void doAnalysis() {
+        // Do pot rebalancing
+        double profit2 = getProfit(txtLastKonto2.getText(), txtKonto2.getText());
+        int lastKonto3 = txtLastKonto3a.getInt() + txtLastKonto3b.getInt();
+        int konto3 = txtKonto3a.getInt() + txtKonto3b.getInt();
+        double profit3 = getProfit(lastKonto3, konto3);
+
+        PotsRebalancer potsRebalancer = new PotsRebalancer(txtKonto1.getInt(), txtKonto2.getInt(), konto3,
+                profit2, profit3, txtBezugJahr.getInt());
+        PotsRebalancing potsRebalancing = potsRebalancer.rebalancing();
+
+        // Do account3 rebalancing
+        AccountRebalancer accountRebalancer = new AccountRebalancer(txtKonto3a.getInt(), txtKonto3b.getInt());
+        accountRebalancer.setParams(txtRebalancing3aPercent.getInt(), txtRebalancing3bPercent.getInt(), txtRebalancingThreshold.getInt());
+        AccountRebalancing accountRebalancing = accountRebalancer.rebalance(potsRebalancing.getFrom3To1()+potsRebalancing.getFrom3To2()-potsRebalancing.getFrom1To3());
+
+        // Do calculation
+        txtNewKonto1.setTextReformat(Integer.toString(txtKonto1.getInt() + potsRebalancing.getFrom2To1() + potsRebalancing.getFrom3To1() - potsRebalancing.getFrom1To3()));
+        txtNewKonto2.setTextReformat(Integer.toString(txtKonto2.getInt() + potsRebalancing.getFrom3To2() - potsRebalancing.getFrom2To1()));
+        txtNewKonto3a.setTextReformat(Integer.toString(txtKonto3a.getInt() + accountRebalancing.getKonto3aChange()));
+        txtNewKonto3b.setTextReformat(Integer.toString(txtKonto3b.getInt() + accountRebalancing.getKonto3bChange()));
+        showText(potsRebalancing, accountRebalancing);
+
+        updateTitle();
+        storeValuesIntoRegistry();
+    }
+
+    private void doHistory() {
+        System.out.println("do Historie");
+    }
+
+    private void doAccept() {
+        System.out.println("do Accept");
+        txtLastKonto1.setText(txtNewKonto1.getText());
+        txtLastKonto2.setText(txtNewKonto2.getText());
+        txtLastKonto3a.setText(txtNewKonto3a.getText());
+        txtLastKonto3b.setText(txtNewKonto3b.getText());
+    }
+
     private void storeValuesIntoRegistry() {
-        System.out.println("do Store");
         data.store("txtLastKonto1", txtLastKonto1.getText());
         data.store("txtLastKonto2", txtLastKonto2.getText());
         data.store("txtLastKonto3a", txtLastKonto3a.getText());
         data.store("txtLastKonto3b", txtLastKonto3b.getText());
+
         data.store("txtKonto1", txtKonto1.getText());
         data.store("txtKonto2", txtKonto2.getText());
         data.store("txtKonto3a", txtKonto3a.getText());
         data.store("txtKonto3b", txtKonto3b.getText());
+
         data.store("txtNewKonto1", txtNewKonto1.getText());
         data.store("txtNewKonto2", txtNewKonto2.getText());
         data.store("txtNewKonto3a", txtNewKonto3a.getText());
         data.store("txtNewKonto3b", txtNewKonto3b.getText());
 
-        data.store("txtKonto1Crit", txtKonto1Crit.getText());
-        data.store("txtKonto1Min", txtKonto1Min.getText());
-        data.store("txtKonto1Max", txtKonto1Max.getText());
-        data.store("txtKonto2Crit", txtKonto2Crit.getText());
-        data.store("txtKonto2Min", txtKonto2Min.getText());
-        data.store("txtKonto2Max", txtKonto2Max.getText());
+        data.store("txtBezugJahr", txtBezugJahr.getText());
 
-        data.store("txtKonto3Min10", txtKonto3Min30.getText());
-        data.store("txtKonto3Min5", txtKonto3Min20.getText());
-        data.store("txtKonto3Plus5", txtKonto3Plus5.getText());
-        data.store("txtKonto3Plus10", txtKonto3Plus10.getText());
+        data.store("txtKonto1Init", txtKonto1Init.getText());
+        data.store("txtKonto2Init", txtKonto2Init.getText());
+        data.store("txtKonto3Init", txtKonto3Init.getText());
 
         data.store("txtRebalancing3aPercent", txtRebalancing3aPercent.getText());
         data.store("txtRebalancing3bPercent", txtRebalancing3bPercent.getText());
         data.store("txtRebalancingThreshold", txtRebalancingThreshold.getText());
 
+        data.store("txtAusgabeGross", txtAusgabeGross.getText());
     }
 
     private void readValuesFromRegistry() {
-        System.out.println("do Store");
         txtLastKonto1.setText(data.getString("txtLastKonto1", "0"));
         txtLastKonto2.setText(data.getString("txtLastKonto2", "0"));
         txtLastKonto3a.setText(data.getString("txtLastKonto3a", "0"));
         txtLastKonto3b.setText(data.getString("txtLastKonto3b", "0"));
+
         txtKonto1.setText(data.getString("txtKonto1", "0"));
         txtKonto2.setText(data.getString("txtKonto2", "0"));
         txtKonto3a.setText(data.getString("txtKonto3a", "0"));
         txtKonto3b.setText(data.getString("txtKonto3b", "0"));
+
         txtNewKonto1.setText(data.getString("txtNewKonto1", "0"));
         txtNewKonto2.setText(data.getString("txtNewKonto2", "0"));
         txtNewKonto3a.setText(data.getString("txtNewKonto3a", "0"));
         txtNewKonto3b.setText(data.getString("txtNewKonto3b", "0"));
 
-        txtKonto1Crit.setText(data.getString("txtKonto1Crit", "0"));
-        txtKonto1Min.setText(data.getString("txtKonto1Min", "0"));
-        txtKonto1Max.setText(data.getString("txtKonto1Max", "0"));
-        txtKonto2Crit.setText(data.getString("txtKonto2Crit", "0"));
-        txtKonto2Min.setText(data.getString("txtKonto2Min", "0"));
-        txtKonto2Max.setText(data.getString("txtKonto2Max", "0"));
+        txtBezugJahr.setText(data.getString("txtBezugJahr", "0"));
 
-        txtKonto3Min30.setText(data.getString("txtKonto3Min10", "0"));
-        txtKonto3Min20.setText(data.getString("txtKonto3Min5", "0"));
-        txtKonto3Plus5.setText(data.getString("txtKonto3Plus5", "0"));
-        txtKonto3Plus10.setText(data.getString("txtKonto3Plus10", "0"));
+        txtKonto1Init.setText(data.getString("txtKonto1Init", "0"));
+        txtKonto2Init.setText(data.getString("txtKonto2Init", "0"));
+        txtKonto3Init.setText(data.getString("txtKonto3Init", "0"));
 
         txtRebalancing3aPercent.setText(data.getString("txtRebalancing3aPercent", "0"));
         txtRebalancing3bPercent.setText(data.getString("txtRebalancing3bPercent", "0"));
         txtRebalancingThreshold.setText(data.getString("txtRebalancingThreshold", "0"));
+
+        txtAusgabeGross.setText(data.getString("txtAusgabeGross", ""));
 
         recalculateProfit();
         updateTitle();
@@ -430,15 +474,19 @@ public class Application extends javafx.application.Application {
 
 
     private void updateTitle() {
-        int letzterKontostand = getInt(txtLastKonto1) + getInt(txtLastKonto2) + getInt(txtLastKonto3a) + getInt(txtLastKonto3b);
+        int letzterKontostand = txtLastKonto1.getInt() + txtLastKonto2.getInt() + txtLastKonto3a.getInt() + txtLastKonto3b.getInt();
         tbLetzerKontostand.setTitle(String.format("Letzter Kontostand: %s CHF",
                 getDecimalFormatter().format(letzterKontostand)));
-        int aktuellerKontostand = getInt(txtKonto1) + getInt(txtKonto2) + getInt(txtKonto3a) + getInt(txtKonto3b);
+        int aktuellerKontostand = txtKonto1.getInt() + txtKonto2.getInt() + txtKonto3a.getInt() + txtKonto3b.getInt();
         tbAktuellerKontostand.setTitle(String.format("Aktueller Kontostand: %s CHF",
                 getDecimalFormatter().format(aktuellerKontostand)));
-        int neuerKontostand = getInt(txtNewKonto1) + getInt(txtNewKonto2) + getInt(txtNewKonto3a) + getInt(txtNewKonto3b);
+        int neuerKontostand = txtNewKonto1.getInt() + txtNewKonto2.getInt() + txtNewKonto3a.getInt() + txtNewKonto3b.getInt();
         tbNeuerKontostand.setTitle(String.format("Neuer Kontostand: %s CHF",
                 getDecimalFormatter().format(neuerKontostand)));
+    }
+
+    private void updateTotal() {
+        txtKontoInitTotal.updateText(Integer.toString(txtKonto1Init.getInt() + txtKonto2Init.getInt() + txtKonto3Init.getInt()));
     }
 
     private void recalculateProfit() {
@@ -448,17 +496,47 @@ public class Application extends javafx.application.Application {
     }
 
     private void recalculateAccount3Percentage() {
-        lblLastVerteilung.setText(getPercentage(txtLastKonto3a, txtLastKonto3b));
-        lblVerteilung.setText(getPercentage(txtKonto3a, txtKonto3b));
-        lblNewVerteilung.setText(getPercentage(txtNewKonto3a, txtNewKonto3b));
+        lblLastVerteilung.setText(getVerteilungText(txtLastKonto1.getInt(), txtLastKonto2.getInt(), txtLastKonto3a.getInt(), txtLastKonto3b.getInt()));
+        lblVerteilung.setText(getVerteilungText(txtKonto1.getInt(), txtKonto2.getInt(), txtKonto3a.getInt(), txtKonto3b.getInt()));
+        lblNewVerteilung.setText(getVerteilungText(txtNewKonto1.getInt(), txtNewKonto2.getInt(), txtNewKonto3a.getInt(), txtNewKonto3b.getInt()));
     }
 
-    private String getPercentage(TextField tf1, TextField tf2) {
-        double kt1 = getInt(tf1);
-        double kt2 = getInt(tf2);
-        double p1 = kt1 + kt2 != 0? kt1 * 100 / (kt1 + kt2): kt1;
-        double p2 = kt2 + kt2 != 0? kt2 * 100 / (kt1 + kt2): kt2;
-        return Math.round(p1) + "% / " + Math.round(p2) + "%";
+    private void recalculateInitPercentage() {
+        double total = txtKonto1Init.getInt() + txtKonto2Init.getInt() + txtKonto3Init.getInt();
+        lblInit1Percentage.setText(String.format("%.0f", txtKonto1Init.getInt() / total * 100) +  "%");
+        lblInit2Percentage.setText(String.format("%.0f", txtKonto2Init.getInt() / total * 100) +  "%");
+        lblInit3Percentage.setText(String.format("%.0f", txtKonto3Init.getInt() / total * 100) +  "%");
+    }
+
+    private void recalculateBezugJahrPercentage() {
+        double amount = txtLastKonto1.getInt() + txtLastKonto2.getInt() + txtLastKonto3a.getInt() + txtLastKonto3b.getInt();
+        double bezug = txtBezugJahr.getInt();
+        double percentage = amount != 0? bezug/ amount * 100: 0;
+        lblBezugJahrPercentage.setText(String.format("%.2f", percentage) + "%");
+
+        Threshold threshold = Threshold.of(txtBezugJahr.getInt());
+        txtKonto1Min.updateText(Integer.toString(threshold.getKonto1Min()));
+        txtKonto1Opt.updateText(Integer.toString(threshold.getKonto1Opt()));
+        txtKonto1Max.updateText(Integer.toString(threshold.getKonto1Max()));
+        txtKonto2Min.updateText(Integer.toString(threshold.getKonto2Min()));
+        txtKonto2Opt.updateText(Integer.toString(threshold.getKonto2Opt()));
+        txtKonto2Max.updateText(Integer.toString(threshold.getKonto2Max()));
+    }
+
+    private String getVerteilungText(double val1, double val2) {
+        double total = val1 + val2;
+        double p1 = total != 0? val1 * 100 / total: val1;
+        double p2 = total != 0? val2 * 100 / total: val2;
+        return Math.round(p1) + "/" + Math.round(p2);
+    }
+
+    private String getVerteilungText(double val1, double val2, double val3a, double val3b) {
+        double val3 = val3a + val3b;
+        double total = val1 + val2 + val3;
+        double p1 = total != 0? val1 * 100 / total: val1;
+        double p2 = total != 0? val2 * 100 / total: val2;
+        double p3 = total != 0? val3 * 100 / total: val3;
+        return Math.round(p1) + "%/" + Math.round(p2) + "%/" + Math.round(p3) + "% (" + getVerteilungText(val3a, val3b) + ")";
     }
 
     private DecimalFormat getDecimalFormatter() {
@@ -483,10 +561,6 @@ public class Application extends javafx.application.Application {
             profit = (newBalance - oldBalance) / oldBalance * 100;
         }
         return profit;
-    }
-
-    private int getInt(TextField textField) {
-        return getInt(textField.getText());
     }
 
     private int getInt(String text) {
@@ -518,45 +592,5 @@ public class Application extends javafx.application.Application {
             ausgabeText += String.format("Konto 3b: %s CHF\n", getDecimalFormatter().format(accountRebalancing.getKonto3bChange()));
         }
         txtAusgabeGross.setText(ausgabeText);
-    }
-
-    // Functionalities
-    private void doAnalysis() {
-        // Do pot rebalancing
-        double profit2 = getProfit(txtLastKonto2.getText(), txtKonto2.getText());
-        int lastKonto3 = getInt(txtLastKonto3a) + getInt(txtLastKonto3b);
-        int konto3 = getInt(txtKonto3a) + getInt(txtKonto3b);
-        double profit3 = getProfit(lastKonto3, konto3);
-
-        PotsRebalancer potsRebalancer = new PotsRebalancer(getInt(txtKonto1), getInt(txtKonto2), konto3, profit2, profit3);
-        potsRebalancer.setKonto1Params(getInt(txtKonto1Crit), getInt(txtKonto1Min));
-        potsRebalancer.setKonto2Params(getInt(txtKonto2Crit), getInt(txtKonto2Min), getInt(txtKonto2Max));
-        potsRebalancer.setKonto3Params(getInt(txtKonto3Plus10), getInt(txtKonto3Plus5), getInt(txtKonto3Min20), getInt(txtKonto3Min30));
-        PotsRebalancing potsRebalancing = potsRebalancer.rebalancing();
-
-        // Do account3 rebalancing
-        AccountRebalancer accountRebalancer = new AccountRebalancer(getInt(txtKonto3a), getInt(txtKonto3b));
-        accountRebalancer.setParams(getInt(txtRebalancing3aPercent), getInt(txtRebalancing3bPercent), getInt(txtRebalancingThreshold));
-        AccountRebalancing accountRebalancing = accountRebalancer.rebalance(potsRebalancing.getFrom3To1()+potsRebalancing.getFrom3To2()-potsRebalancing.getFrom1To3());
-
-        // Do calculation
-        txtNewKonto1.setTextReformat(Integer.toString(getInt(txtKonto1) + potsRebalancing.getFrom2To1() + potsRebalancing.getFrom3To1() - potsRebalancing.getFrom1To3()));
-        txtNewKonto2.setTextReformat(Integer.toString(getInt(txtKonto2) + potsRebalancing.getFrom3To2() - potsRebalancing.getFrom2To1()));
-        txtNewKonto3a.setTextReformat(Integer.toString(getInt(txtKonto3a) + accountRebalancing.getKonto3aChange()));
-        txtNewKonto3b.setTextReformat(Integer.toString(getInt(txtKonto3b) + accountRebalancing.getKonto3bChange()));
-        showText(potsRebalancing, accountRebalancing);
-    }
-
-    private void doHistory() {
-        System.out.println("do Historie");
-    }
-
-    private void doAccept() {
-        System.out.println("do Accept");
-        txtLastKonto1.setText(txtNewKonto1.getText());
-        txtLastKonto2.setText(txtNewKonto2.getText());
-        txtLastKonto3a.setText(txtNewKonto3a.getText());
-        txtLastKonto3b.setText(txtNewKonto3b.getText());
-
     }
 }
