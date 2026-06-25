@@ -7,12 +7,13 @@ import java.text.DecimalFormat;
 public abstract class AbstractTextField extends TextField {
     private final int maxLength;
 
-    private final boolean readonly = false;
-
-    public AbstractTextField(int width, int length) {
+    public AbstractTextField(int width, int length, String hint, boolean readonly) {
         maxLength = length;
-        setPromptText("Enter number..");
+        if (hint != null) {
+            setPromptText(hint);
+        }
         setPrefWidth(width);
+        setReadonly(readonly);
 
         // Event-Listener für den Fokusverlust hinzufügen
         focusedProperty().addListener((observable, oldVal, newVal) -> {
@@ -42,34 +43,19 @@ public abstract class AbstractTextField extends TextField {
         });
     }
 
-    public void setTextReformat(String text) {
-        setText(text);
-        applyFormatting();
-    }
-
-    public void setReadonly(boolean readonly) {
-        setEditable(false);
-        setFocusTraversable(false);
-        if (readonly) {
-            setStyle("-fx-control-inner-background: #F2F2F2");
-        } else {
-            setStyle("-fx-control-inner-background: #fffff");
-        }
-    }
-
     protected abstract boolean matches(String newText);
 
     protected abstract DecimalFormat getDecimalFormatter();
 
     protected abstract void updateText(String input);
 
-    private void removeFormatting() {
+    protected void removeFormatting() {
         String input = getText();
         input = input.replace("'", "");
         setText(input);
     }
 
-    private void applyFormatting() {
+    protected void applyFormatting() {
         String input = getText();
 
         // Alte Trennzeichen entfernen
@@ -80,6 +66,16 @@ public abstract class AbstractTextField extends TextField {
         } else if (!input.isEmpty()) {
             // Ungültigen Text (z.B. Buchstaben) löschen
             clear();
+        }
+    }
+
+    protected void setReadonly(boolean readonly) {
+        setEditable(!readonly);
+        setFocusTraversable(!readonly);
+        if (readonly) {
+            setStyle("-fx-control-inner-background: #F2F2F2");
+        } else {
+            setStyle("-fx-control-inner-background: #ffffff");
         }
     }
 }

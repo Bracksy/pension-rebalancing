@@ -5,8 +5,13 @@ import java.text.DecimalFormatSymbols;
 
 public class IntegerTextField extends AbstractTextField {
 
-    public IntegerTextField(int width, int length) {
-        super(width, length);
+
+    public IntegerTextField(int width, int length, boolean readonly) {
+        super(width, length, null, readonly);
+    }
+
+    public IntegerTextField(int width, int length, String hint) {
+        super(width, length, hint, false);
     }
 
     public int getInt() {
@@ -15,6 +20,13 @@ public class IntegerTextField extends AbstractTextField {
             value = Integer.parseInt(getText().replace("'", ""));
         }
         return value;
+    }
+
+    public void setInt(Integer value) {
+        if (value != null) {
+            setText(Integer.toString(value));
+            applyFormatting();
+        }
     }
 
     protected boolean matches(String newText) {

@@ -3,18 +3,25 @@ package ch.immi.pension.javafx;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
-public class FloatTextField extends AbstractTextField {
+public class DoubleTextField extends AbstractTextField {
 
-    public FloatTextField(int width, int length) {
-        super(width, length);
+    public DoubleTextField(int width, int length, String hint) {
+        super(width, length, hint, false);
     }
 
-    public float getFloat() {
-        float value = 0;
+    public double getDouble() {
+        double value = 0;
         if (getText() != null && !getText().isEmpty()) {
-            value = Float.parseFloat(getText().replace("'", ""));
+            value = Double.parseDouble(getText().replace("'", ""));
         }
         return value;
+    }
+
+    public void setDouble(Double value) {
+        if (value != null) {
+            setText(Double.toString(value));
+            applyFormatting();
+        }
     }
 
     protected boolean matches(String newText) {
@@ -25,7 +32,7 @@ public class FloatTextField extends AbstractTextField {
         // Schweizer Hochkomma-Format definieren
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator('\'');
-        return new DecimalFormat("#,###.##", symbols);
+        return new DecimalFormat("#,###.00", symbols);
     }
 
     protected void updateText(String input) {

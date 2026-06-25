@@ -10,12 +10,12 @@ public class TitledBorder extends VBox {
 
     public TitledBorder(String title) {
         // 1. Die Hauptbox für den Rahmen
-        super(10);
+        super(5);
         setStyle("-fx-border-color: #ababab; " +
                 "-fx-border-width: 1; " +
                 "-fx-border-style: solid; " +
                 "-fx-border-radius: 5; " +
-                "-fx-padding: 15 10 10 10;");
+                "-fx-padding: 10 5 5 5;");
 
         // 2. Das Label für den Titel
         lblTitle.setText(title);
