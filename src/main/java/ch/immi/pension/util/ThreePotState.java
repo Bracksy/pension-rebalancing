@@ -32,12 +32,6 @@ public class ThreePotState {
         threePotChange.addFrom2To1(amount);
     }
 
-    public void moveFrom1To2(int amount) {
-        pot1 -= amount;
-        pot2 += amount;
-        threePotChange.addFrom1To3(amount);
-    }
-
     public void moveFrom3To2(int shares3a, int shares3b) {
         int amount = (int)(shares3a * price3a + shares3b * price3b);
         numOfShares3a -= shares3a;
@@ -63,16 +57,6 @@ public class ThreePotState {
         numOfShares3a += shares3a;
         numOfShares3b += shares3b;
         pot2 -= amount;
-        threePotChange.addChangeShares3a(shares3a);
-        threePotChange.addChangeShares3b(shares3b);
-        threePotChange.addFrom2To3(amount);
-    }
-
-    public void moveFrom1To3(int shares3a, int shares3b) {
-        int amount = (int)(shares3a * price3a + shares3b * price3b);
-        numOfShares3a += shares3a;
-        numOfShares3b += shares3b;
-        pot1 -= amount;
         threePotChange.addChangeShares3a(shares3a);
         threePotChange.addChangeShares3b(shares3b);
         threePotChange.addFrom2To3(amount);

@@ -1,6 +1,8 @@
 package ch.immi.pension.javafx;
 
+import javafx.application.Platform;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 
 import java.text.DecimalFormat;
 
@@ -27,20 +29,46 @@ public abstract class AbstractTextField extends TextField {
             }
         });
 
-        textProperty().addListener((observable, oldText, newText) -> {
-            if (!readonly) {
-                if (newText != null && !newText.isEmpty()) {
-                    if (!matches(newText) || newText.length() > maxLength) {
-                        setText(oldText);
-                    }
-                    // Format initially
-                    if ((oldText == null || oldText.isEmpty())) {
-                        applyFormatting();
-                    }
-                }
-            }
+        if (!readonly) {
+            setTextFormatter(new TextFormatter<>(change -> {
+                // Holt den Text, wie er NACH der Änderung aussehen würde
+                String newText = change.getControlNewText();
 
-        });
+                // Wenn das Feld geleert wird, erlauben wir das immer
+                if (newText.isEmpty()) {
+                    setTransferred(false); // Logik aus Ihrem alten Listener
+                    return change;
+                }
+
+                // VALIDIERUNG: Passt das Regex-Match oder ist der Text zu lang?
+                if (!matches(newText) || newText.length() > maxLength) {
+                    // BLOCKIEREN: Die Änderung (z.B. ein falsches Ctrl+V) wird einfach ignoriert!
+                    // Ctrl+C/V stürzen dadurch nicht ab und behalten ihre Funktion.
+                    return null;
+                }
+
+                // LOGIK FÜR FORMATIERUNGS-ÄNDERUNGEN
+                String oldText = change.getControlText();
+                if (oldText.isEmpty()) {
+                    // Da wir im TextFormatter sind, können wir applyFormatting() hier oft nicht direkt aufrufen,
+                    // da es den Text erneut ändern würde. Nutzen Sie dafür besser Platform.runLater:
+                    Platform.runLater(() -> applyFormatting());
+                } else if (!removeFormatting(oldText).equals(removeFormatting(newText))) {
+                    setTransferred(false);
+                }
+
+                return change; // Änderung ist valide und wird ausgeführt
+            }));
+        }
+
+    }
+
+    public void setTransferred(boolean transferred) {
+        if (transferred) {
+            setStyle("-fx-control-inner-background: #d7f5fa");
+        } else {
+            setStyle("-fx-control-inner-background: #FFFFFF");
+        }
     }
 
     protected abstract boolean matches(String newText);
@@ -51,7 +79,7 @@ public abstract class AbstractTextField extends TextField {
 
     protected void removeFormatting() {
         String input = getText();
-        input = input.replace("'", "");
+        input = removeFormatting(input);
         setText(input);
     }
 
@@ -59,7 +87,7 @@ public abstract class AbstractTextField extends TextField {
         String input = getText();
 
         // Alte Trennzeichen entfernen
-        input = input.replace("'", "");
+        input = removeFormatting(input);
 
         if (matches(input)) {
             updateText(input);
@@ -75,7 +103,11 @@ public abstract class AbstractTextField extends TextField {
         if (readonly) {
             setStyle("-fx-control-inner-background: #F2F2F2");
         } else {
-            setStyle("-fx-control-inner-background: #ffffff");
+            setStyle("-fx-control-inner-background: #FFFFFF");
         }
+    }
+
+    private String removeFormatting(String text) {
+        return text.replace("'", "");
     }
 }

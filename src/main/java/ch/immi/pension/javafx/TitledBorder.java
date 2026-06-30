@@ -20,7 +20,7 @@ public class TitledBorder extends VBox {
         // 2. Das Label für den Titel
         lblTitle.setText(title);
         // Wichtig: Eine feste Hintergrundfarbe (z.B. weiß) eingeben, damit die Linie darunter verschwindet
-        lblTitle.setStyle("-fx-font-weight: bold; -fx-background-color: white; -fx-padding: 0 5 0 5;");
+        lblTitle.setStyle("-fx-font-weight: bold; -fx-background-color: #F2F2F2; -fx-padding: 0 5 0 5;");
 
         // Wir positionieren das Label relativ zur Box
         lblTitle.setTranslateY(-20); // Schiebt es hoch auf den Rahmen
@@ -30,7 +30,7 @@ public class TitledBorder extends VBox {
         // Weil das Label durch -25px nach oben verschoben wurde, klafft darunter eine Lücke.
         // Wir setzen einen negativen Abstand (Margin) für das NÄCHSTE Element, das in die Box kommt.
         // Dadurch rutscht dein GridPane magisch ganz nach oben an den Rand!
-        VBox.setMargin(lblTitle, new Insets(0, 0, -20, 0));
+        VBox.setMargin(lblTitle, new Insets(0, 0, -18, 0));
 
         getChildren().add(lblTitle);
     }

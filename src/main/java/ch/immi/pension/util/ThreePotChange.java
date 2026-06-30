@@ -5,7 +5,6 @@ public class ThreePotChange {
     int changeShares3b = 0;
     boolean changedHighestPrice3a = false;
     boolean changedHighestPrice3b = false;
-    int from1To3 = 0;
     int from2To1 = 0;
     int from2To3 = 0;
     int from3To1 = 0;
@@ -68,14 +67,6 @@ public class ThreePotChange {
 
     public void addFrom3To2(int from3To2) {
         this.from3To2 += from3To2;
-    }
-
-    public int getFrom1To3() {
-        return from1To3;
-    }
-
-    public void addFrom1To3(int from1To3) {
-        this.from1To3 += from1To3;
     }
 
     public int getFrom2To3() {

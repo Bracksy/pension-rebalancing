@@ -1,12 +1,8 @@
 package ch.immi.pension;
 
-import ch.immi.pension.util.Pots3State;
-import ch.immi.pension.util.PotThreshold;
+import ch.immi.pension.util.*;
 import ch.immi.pension.javafx.*;
 import ch.immi.pension.persistence.Data;
-import ch.immi.pension.util.Pot3System;
-import ch.immi.pension.util.ThreePotState;
-import ch.immi.pension.util.ThreePotSystem;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,9 +11,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import javafx.scene.web.WebView;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,7 +76,6 @@ public class Application extends javafx.application.Application {
 
     private final IntegerTextField txtReadonlyKonto1Min = new IntegerTextField(70, 7, true);
     private final IntegerTextField txtReadonlyKonto1Opt = new IntegerTextField(70, 7, true);
-    private final IntegerTextField txtReadonlyKonto1Max = new IntegerTextField(70, 7, true);
 
     private final IntegerTextField txtReadonlyKonto2Min = new IntegerTextField(70, 7,true);
     private final IntegerTextField txtReadonlyKonto2Opt = new IntegerTextField(70, 7, true);
@@ -93,9 +88,15 @@ public class Application extends javafx.application.Application {
     private final IntegerTextField txtRebalancingThreshold = new IntegerTextField(40, 3, "Prozent");
 
     private final TextArea txtAusgabeGross = new TextArea();
+    private final WebView webViewAusgabe = new WebView();
+    private StackPane outputStack;
 
     private String selectedKey = null;
     private Stage mainStage;
+
+    private enum Type {
+        KAUF, VERKAUF
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -103,7 +104,7 @@ public class Application extends javafx.application.Application {
         primaryStage.setTitle("Rebalancing berechnen..");
 
         // Haupt-Layout: Vertikal gestapelt (Oben: Spalten, Mitte: Button, Unten: Textfeld)
-        VBox rootLayout = new VBox(15);
+        VBox rootLayout = new VBox(10);
         rootLayout.setPadding(new Insets(15));
         rootLayout.setAlignment(Pos.TOP_CENTER);
 
@@ -116,7 +117,12 @@ public class Application extends javafx.application.Application {
         topBox.setAlignment(Pos.TOP_LEFT);
 
         VBox leftBox = new VBox(10);
-        leftBox.getChildren().addAll(lastAccountWithHighestBox(), accountWithHighestBox());
+        Button btnTransfer = new Button("Daten übernehmen");
+        btnTransfer.setMaxWidth(Integer.MAX_VALUE);
+        btnTransfer.setOnAction(event -> {
+            doTransfer();
+        });
+        leftBox.getChildren().addAll(lastAccountWithHighestBox(), btnTransfer, accountWithHighestBox());
 
         VBox rechterBereich = parameterBox();
 
@@ -142,9 +148,14 @@ public class Application extends javafx.application.Application {
         HBox.setHgrow(btnHistory, Priority.ALWAYS);
         btnHistory.setOnAction(event -> doHistory());
 
+        ToggleButton btnToggleWeb = new ToggleButton("Web");
+        btnToggleWeb.setMaxWidth(Double.MAX_VALUE);
+        btnToggleWeb.setPrefHeight(35);
+        btnToggleWeb.setOnAction(e -> showWebView(btnToggleWeb.isSelected()));
+
         HBox buttonBox = new HBox(5);
         buttonBox.setMaxWidth(Double.MAX_VALUE);
-        buttonBox.getChildren().addAll(btnAnalysis, btnHistory);
+        buttonBox.getChildren().addAll(btnAnalysis, btnHistory, btnToggleWeb);
 
         // ==========================================
         // UNTERER BEREICH: Grosses Multiline-Textfeld
@@ -152,13 +163,13 @@ public class Application extends javafx.application.Application {
         HBox bottomBox = new HBox(5);
         bottomBox.setAlignment(Pos.TOP_LEFT);
 
-        bottomBox.getChildren().addAll(textAusgabeArea(), newAccountWithHighestBox());
+        bottomBox.getChildren().addAll(outputPane(), newAccountWithHighestBox());
 
         // Alles in das Haupt-Layout einfügen (von oben nach unten gestapelt)
         rootLayout.getChildren().addAll(chooseBox, topBox, buttonBox, bottomBox);
 
         // Fenstergrösse angepasst (Breite: 760, Höhe: 700 wegen dem neuen Textfeld)
-        Scene scene = new Scene(rootLayout, 900, 680);
+        Scene scene = new Scene(rootLayout, 900, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -415,7 +426,6 @@ public class Application extends javafx.application.Application {
         gridRechtsKonto12.add(new Label("Konto 1:"), 0, 2);
         gridRechtsKonto12.add(txtReadonlyKonto1Min, 1, 2);
         gridRechtsKonto12.add(txtReadonlyKonto1Opt, 2, 2);
-        gridRechtsKonto12.add(txtReadonlyKonto1Max, 3, 2);
 
         gridRechtsKonto12.add(new Label("Konto 2:"), 0, 3);
         gridRechtsKonto12.add(txtReadonlyKonto2Min, 1, 3);
@@ -455,6 +465,35 @@ public class Application extends javafx.application.Application {
         txtAusgabeGross.setPrefHeight(210);
         txtAusgabeGross.setWrapText(true);
         return txtAusgabeGross;
+    }
+
+    private StackPane outputPane() {
+        textAusgabeArea(); // ensure text area configured
+        webViewAusgabe.setPrefHeight(210);
+        webViewAusgabe.setVisible(false);
+
+        outputStack = new StackPane();
+        outputStack.getChildren().addAll(txtAusgabeGross, webViewAusgabe);
+        return outputStack;
+    }
+
+    private void showWebView(boolean show) {
+        if (outputStack == null) return;
+        if (show) {
+            String text = txtAusgabeGross.getText();
+            String html = "<pre>" + escapeHtml(text) + "</pre>";
+            webViewAusgabe.getEngine().loadContent(html);
+        } else {
+            // clear web engine content to free resources
+            webViewAusgabe.getEngine().loadContent("");
+        }
+        webViewAusgabe.setVisible(show);
+        txtAusgabeGross.setVisible(!show);
+    }
+
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     private VBox newAccountWithHighestBox() {
@@ -563,7 +602,6 @@ public class Application extends javafx.application.Application {
         for (TextField tf : textFields) {
             tf.textProperty().addListener((observable, oldText, newText) -> {
                 if (newText != null && !newText.isEmpty()) {
-                    recalculateProfit();
                     recalculateAccount3();
                     recalculateAccount3Percentage();
                     recalculateBezugJahrPercentage();
@@ -612,7 +650,87 @@ public class Application extends javafx.application.Application {
         }
     }
 
+    private void doTransfer() {
+        txtKonto1.setInt(txtLastKonto1.getInt());
+        txtKonto2.setInt(txtLastKonto2.getInt());
+        txtNumber3a.setInt(txtLastNumber3a.getInt());
+        txtPrice3a.setDouble(txtLastPrice3a.getDouble());
+        txtNumber3b.setInt(txtLastNumber3b.getInt());
+        txtPrice3b.setDouble(txtLastPrice3b.getDouble());
+
+        txtHighestPrice3a.setDouble(Math.max(Math.max(txtLastHighestPrice3a.getDouble(), txtPrice3a.getDouble()),
+                txtHighestPrice3a.getDouble()));
+        txtHighestPrice3b.setDouble(Math.max(Math.max(txtLastHighestPrice3b.getDouble(), txtPrice3b.getDouble()),
+                txtHighestPrice3b.getDouble()));
+
+        updateTransferred();
+        recalculateAccount3();
+    }
+
     private void doAnalysis() {
+        ThreePotState state = getRebalancedState();
+
+        // Do calculation
+        txtNewKonto1.setInt(state.getPot1());
+        txtNewKonto2.setInt(state.getPot2());
+        txtNewNumber3a.setInt(state.getNumOfShares3a());
+        txtNewPrice3a.setDouble(state.getPrice3a());
+        txtNewNumber3b.setInt(state.getNumOfShares3b());
+        txtNewPrice3b.setDouble(state.getPrice3b());
+        txtNewHighestPrice3a.setDouble(state.getHighestPrice3a());
+        txtNewHighestPrice3b.setDouble(state.getHighestPrice3b());
+        showText(state);
+
+        updateTitle();
+        storeValuesIntoRegistry();
+
+        // Write history
+        try {
+            String content = HistoryUtil.fill(getCurrentState(), getNewState(), txtAusgabeGross.getText());
+            HistoryUtil.write(selectedKey, content);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void doHistory() {
+        System.out.println("do History");
+    }
+
+    private void doAccept() {
+        System.out.println("do Accept");
+        txtLastKonto1.setInt(txtNewKonto1.getInt());
+        txtLastKonto2.setInt(txtNewKonto2.getInt());
+        txtLastNumber3a.setInt(txtNewNumber3a.getInt());
+        txtLastPrice3a.setDouble(txtNewPrice3a.getDouble());
+        txtLastNumber3b.setInt(txtNewNumber3b.getInt());
+        txtLastPrice3b.setDouble(txtNewPrice3b.getDouble());
+
+        storeValuesIntoRegistry();
+        updateTransferred();
+
+        // Write history
+        try {
+            String content = HistoryUtil.fill(getCurrentState(), getNewState(), txtAusgabeGross.getText());
+            HistoryUtil.write(selectedKey, content);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private ThreePotState getCurrentState() {
+        return new ThreePotState(txtKonto1.getInt(), txtKonto2.getInt(),
+                txtNumber3a.getInt(), txtPrice3a.getDouble(), txtNumber3b.getInt(),
+                txtPrice3b.getDouble(), txtHighestPrice3a.getDouble(), txtHighestPrice3b.getDouble());
+    }
+
+    private ThreePotState getNewState() {
+        return new ThreePotState(txtNewKonto1.getInt(), txtNewKonto2.getInt(),
+                txtNewNumber3a.getInt(), txtNewPrice3a.getDouble(), txtNewNumber3b.getInt(),
+                txtNewPrice3b.getDouble(), txtNewHighestPrice3a.getDouble(), txtNewHighestPrice3b.getDouble());
+    }
+
+    private ThreePotState getRebalancedState() {
         // Do pot rebalancing
         double rebalancePercentage3a = ((double)txtRebalancing3aPercent.getInt()) / 100;
         double rebalancePercentage3b = ((double)txtRebalancing3bPercent.getInt()) / 100;
@@ -633,33 +751,7 @@ public class Application extends javafx.application.Application {
                 rebalancePercentage3b);
         threePotSystem.updateState(state);
 
-        // Do calculation
-        txtNewKonto1.setInt(state.getPot1());
-        txtNewKonto2.setInt(state.getPot2());
-        txtNewNumber3a.setInt(state.getNumOfShares3a());
-        txtNewPrice3a.setDouble(state.getPrice3a());
-        txtNewNumber3b.setInt(state.getNumOfShares3b());
-        txtNewPrice3b.setDouble(state.getPrice3b());
-        txtNewHighestPrice3a.setDouble(state.getHighestPrice3a());
-        txtNewHighestPrice3b.setDouble(state.getHighestPrice3b());
-        showText(state);
-
-        updateTitle();
-        storeValuesIntoRegistry();
-    }
-
-    private void doHistory() {
-        System.out.println("do Historie");
-    }
-
-    private void doAccept() {
-        System.out.println("do Accept");
-        txtLastKonto1.setInt(txtNewKonto1.getInt());
-        txtLastKonto2.setInt(txtNewKonto2.getInt());
-        txtLastNumber3a.setInt(txtNewNumber3a.getInt());
-        txtLastPrice3a.setDouble(txtLastPrice3a.getDouble());
-        txtLastNumber3b.setInt(txtLastNumber3b.getInt());
-        txtLastPrice3b.setDouble(txtLastPrice3b.getDouble());
+        return state;
     }
 
     private List<Data.KeyValue> getConfigurationLabels() {
@@ -709,6 +801,8 @@ public class Application extends javafx.application.Application {
         data.store(selectedKey, "txtRebalancingThreshold", txtRebalancingThreshold.getInt());
 
         data.store(selectedKey, "txtAusgabeGross", txtAusgabeGross.getText());
+
+        updateTransferred();
     }
 
     private void readValuesFromRegistry() {
@@ -753,21 +847,32 @@ public class Application extends javafx.application.Application {
         String txtAusgabeGrossText = data.getString(selectedKey, "txtAusgabeGross");
         txtAusgabeGross.setText(Objects.requireNonNullElse(txtAusgabeGrossText, ""));
 
-        recalculateProfit();
         recalculateAccount3();
         updateTitle();
+        updateTransferred();
+    }
+
+    private void updateTransferred() {
+        txtKonto1.setTransferred(txtKonto1.getInt() == txtLastKonto1.getInt());
+        txtKonto2.setTransferred(txtKonto2.getInt() == txtLastKonto2.getInt());
+        txtNumber3a.setTransferred(txtNumber3a.getInt() == txtLastNumber3a.getInt());
+        txtPrice3a.setTransferred(txtPrice3a.getDouble() == txtLastPrice3a.getDouble());
+        txtNumber3b.setTransferred(txtNumber3b.getInt() == txtLastNumber3b.getInt());
+        txtPrice3b.setTransferred(txtPrice3b.getDouble() == txtLastPrice3b.getDouble());
+        txtHighestPrice3a.setTransferred(txtHighestPrice3a.getDouble() == txtLastHighestPrice3a.getDouble());
+        txtHighestPrice3b.setTransferred(txtHighestPrice3b.getDouble() == txtLastHighestPrice3b.getDouble());
     }
 
     private void updateTitle() {
         int letzterAccount = txtLastKonto1.getInt() + txtLastKonto2.getInt() + txtReadonlyLastKonto3a.getInt() + txtReadonlyLastKonto3b.getInt();
         tbLastAccount.setTitle(String.format("Letzter Kontostand: %s CHF",
-                getDecimalFormatter().format(letzterAccount)));
+                FormatUtil.getDecimalFormatter().format(letzterAccount)));
         int aktuellerAccount = txtKonto1.getInt() + txtKonto2.getInt() + txtReadonlyKonto3a.getInt() + txtReadonlyKonto3b.getInt();
         tbCurrentAccount.setTitle(String.format("Aktueller Kontostand: %s CHF",
-                getDecimalFormatter().format(aktuellerAccount)));
+                FormatUtil.getDecimalFormatter().format(aktuellerAccount)));
         int neuerAccount = txtNewKonto1.getInt() + txtNewKonto2.getInt() + txtReadonlyNewKonto3a.getInt() + txtReadonlyNewKonto3b.getInt();
         tbNewAccount.setTitle(String.format("Neuer Kontostand: %s CHF",
-                getDecimalFormatter().format(neuerAccount)));
+                FormatUtil.getDecimalFormatter().format(neuerAccount)));
     }
 
     private void updateHoechststand() {
@@ -796,12 +901,9 @@ public class Application extends javafx.application.Application {
             txtHighestPrice3a.setText(txtPrice3a.getText());
         } else {
             double highestPrice3a = txtHighestPrice3a.getDouble();
-            double lastHighestPrice3a = data.getDouble(selectedKey, "txtHighestPrice3a", 0);
             double currentPrice3a = txtPrice3a.getDouble();
             if (currentPrice3a > highestPrice3a) {
                 txtHighestPrice3a.setDouble(currentPrice3a);
-            } else if (lastHighestPrice3a > 0) {
-                txtHighestPrice3a.setDouble(lastHighestPrice3a);
             }
         }
         if (txtHighestPrice3b.getText() == null || txtHighestPrice3b.getText().isBlank()
@@ -809,12 +911,9 @@ public class Application extends javafx.application.Application {
             txtHighestPrice3b.setText(txtPrice3b.getText());
         } else {
             double highestPrice3b = txtHighestPrice3b.getDouble();
-            double lastHighestPrice3b = data.getDouble(selectedKey, "txtHighestPrice3b", 0);
             double currentPrice3b = txtPrice3b.getDouble();
             if (currentPrice3b > highestPrice3b) {
                 txtHighestPrice3b.setDouble(currentPrice3b);
-            } else if (lastHighestPrice3b > 0) {
-                txtHighestPrice3b.setDouble(lastHighestPrice3b);
             }
         }
     }
@@ -832,6 +931,9 @@ public class Application extends javafx.application.Application {
         txtReadonlyKonto3b.setInt((int)Math.round(txtNumber3b.getInt() * txtPrice3b.getDouble()));
         txtReadonlyNewKonto3a.setInt((int)Math.round(txtNewNumber3a.getInt() * txtNewPrice3a.getDouble()));
         txtReadonlyNewKonto3b.setInt((int)Math.round(txtNewNumber3b.getInt() * txtNewPrice3b.getDouble()));
+
+        recalculateAccount3Percentage();
+        recalculateProfit();
     }
 
     private void recalculateAccount3Percentage() {
@@ -849,7 +951,6 @@ public class Application extends javafx.application.Application {
         PotThreshold threshold = PotThreshold.of(txtBezugJahr.getInt());
         txtReadonlyKonto1Min.setInt(threshold.getPot1Min());
         txtReadonlyKonto1Opt.setInt(threshold.getPot1Opt());
-        txtReadonlyKonto1Max.setInt(threshold.getPot1Max());
         txtReadonlyKonto2Min.setInt(threshold.getPot2Min());
         txtReadonlyKonto2Opt.setInt(threshold.getPot2Opt());
         txtReadonlyKonto2Max.setInt(threshold.getPot2Max());
@@ -857,23 +958,9 @@ public class Application extends javafx.application.Application {
 
     private String getVerteilungText(double val1, double val2) {
         double total = val1 + val2;
-        double p1 = total != 0? val1 * 100 / total: val1;
-        double p2 = total != 0? val2 * 100 / total: val2;
+        double p1 = total != 0 ? val1 * 100 / total : val1;
+        double p2 = total != 0 ? val2 * 100 / total : val2;
         return Math.round(p1) + "%/ " + Math.round(p2) + "%";
-    }
-
-    private DecimalFormat getDecimalFormatter() {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setGroupingSeparator('\'');
-        return new DecimalFormat("#,###", symbols);
-    }
-
-
-    protected DecimalFormat getDoubleFormatter() {
-        // Schweizer Hochkomma-Format definieren
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setGroupingSeparator('\'');
-        return new DecimalFormat("#,###.00", symbols);
     }
 
     private String getProfitAsText(String oldBalanceTxt, String newBalanceTxt) {
@@ -904,48 +991,63 @@ public class Application extends javafx.application.Application {
 
     private void showText(ThreePotState newState) {
         String ausgabeText = "";
-        if (newState.getChange().getFrom1To3() > 0) {
-            ausgabeText += String.format("Konto 1: -%s CHF\n", getDecimalFormatter().format(newState.getChange().getFrom1To3()));
-            ausgabeText += String.format(" -> Kauf Konto 3: %s CHF (3a: %s ETF, 3b: %s ETF)\n",
-                    getDecimalFormatter().format(newState.getChange().getFrom1To3()),
-                    getDecimalFormatter().format(newState.getChange().getChangeShares3a()),
-                    getDecimalFormatter().format(newState.getChange().getChangeShares3b()));
-            ausgabeText += "\n";
-        }
         if (newState.getChange().getFrom2To1() > 0 || newState.getChange().getFrom2To3() > 0) {
             int sellKonto2 = newState.getChange().getFrom2To1() + newState.getChange().getFrom2To3();
-            ausgabeText += String.format("Verkauf Konto 2: %s CHF\n", getDecimalFormatter().format(sellKonto2));
+            ausgabeText += String.format("Verkauf Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(sellKonto2));
             if (newState.getChange().getFrom2To1() > 0) {
-                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", getDecimalFormatter().format(newState.getChange().getFrom2To1()));
+                ausgabeText += "<ul><li>";
+                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom2To1()));
+                ausgabeText += "</li></ul>";
             }
             if (newState.getChange().getFrom2To3() > 0) {
-                ausgabeText += String.format(" -> Kauf Konto 3: %s CHF (3a: %s ETF, 3b: %s ETF)\n",
-                        getDecimalFormatter().format(newState.getChange().getFrom2To3()),
-                        getDecimalFormatter().format(newState.getChange().getChangeShares3a()),
-                        getDecimalFormatter().format(newState.getChange().getChangeShares3b()));
+                ausgabeText += konto3KaufVerkaufText(Type.KAUF, newState.getChange().getFrom2To3(),
+                        newState.getChange().getChangeShares3a(), newState.getChange().getChangeShares3b());
             }
             ausgabeText += "\n";
         }
         if (newState.getChange().getFrom3To1() > 0 || newState.getChange().getFrom3To2() > 0) {
             int sellKonto3 = newState.getChange().getFrom3To1() + newState.getChange().getFrom3To2();
-            ausgabeText += String.format("Verkauf Konto 3: %s CHF (3a: %s ETF, 3b: %s ETF)\n",
-                    getDecimalFormatter().format(sellKonto3),
-                    getDecimalFormatter().format(newState.getChange().getChangeShares3a()),
-                    getDecimalFormatter().format(newState.getChange().getChangeShares3b()));
+            ausgabeText += konto3KaufVerkaufText(Type.VERKAUF, sellKonto3,
+                    newState.getChange().getChangeShares3a(), newState.getChange().getChangeShares3b());
+            ausgabeText += "<ul>";
             if (newState.getChange().getFrom3To1() > 0) {
-                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", getDecimalFormatter().format(newState.getChange().getFrom3To1()));
+                ausgabeText += "<li>";
+                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To1()));
+                ausgabeText += "</li>";
             }
             if (newState.getChange().getFrom3To2() > 0) {
-                ausgabeText += String.format(" -> Einlage Konto 2: %s CHF\n", getDecimalFormatter().format(newState.getChange().getFrom3To2()));
+                ausgabeText += "<li>";
+                ausgabeText += String.format(" -> Einlage Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To2()));
+                ausgabeText += "</li>";
             }
+            ausgabeText += "<ul>";
             ausgabeText += "\n";
         }
         if (newState.getChange().isChangedHighestPrice3a()) {
-            ausgabeText += String.format("Neuer Höchststand 3a: %s CHF\n", getDoubleFormatter().format(newState.getHighestPrice3a()));
+            ausgabeText += String.format("Neuer Höchststand 3a: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3a()));
         }
         if (newState.getChange().isChangedHighestPrice3b()) {
-            ausgabeText += String.format("Neuer Höchststand 3b: %s CHF\n", getDoubleFormatter().format(newState.getHighestPrice3b()));
+            ausgabeText += String.format("Neuer Höchststand 3b: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3b()));
         }
         txtAusgabeGross.setText(ausgabeText);
+    }
+
+    private String konto3KaufVerkaufText(Type type, int sellBuyKonto3, int numOfShares3a, int numOfShares3b) {
+        String text = "Verkauf ";
+        if (type == Type.KAUF) {
+            text = "Kauf ";
+        }
+        if (numOfShares3a != 0 && numOfShares3b != 0) {
+            text += String.format("Konto 3: %s CHF (3a: %s ETF, 3b: %s ETF)\n",
+                    FormatUtil.getDecimalFormatter().format(sellBuyKonto3), FormatUtil.getDecimalFormatter().format(numOfShares3a),
+                    FormatUtil.getDecimalFormatter().format(numOfShares3b));
+        } else if (numOfShares3a != 0) {
+            text += String.format("Konto 3: %s CHF (3a: %s ETF)\n", FormatUtil.getDecimalFormatter().format(sellBuyKonto3),
+                    FormatUtil.getDecimalFormatter().format(numOfShares3a));
+        } else if (numOfShares3b != 0) {
+            text += String.format("Konto 3: %s CHF (3b: %s ETF)\n", FormatUtil.getDecimalFormatter().format(sellBuyKonto3),
+                    FormatUtil.getDecimalFormatter().format(numOfShares3b));
+        }
+        return text;
     }
 }
