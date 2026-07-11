@@ -3,14 +3,17 @@ package ch.immi.pension.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 public class HistoryUtil {
-    private final static String HISTORY_TEMPLATE_PATH = "templates/history_template.html";
+    private final static String STYLE_PATH = "templates/style.css";
+    private final static String HISTORY_TEMPLATE_PATH = "templates/history.html";
+    private final static String HISTORY_BLOCK_DIV_PATH = "templates/history_block_div.html";
+
+    private final static String DATE_TIME = "DATE_TIME";
 
     private final static String CURRENT_BALANCE = "CURRENT_BALANCE";
     private final static String CURRENT_ACCOUNT_1 = "CURRENT_ACCOUNT_1";
@@ -34,9 +37,12 @@ public class HistoryUtil {
 
     private final static String REBALANCING_OUTPUT = "REBALANCING_OUTPUT";
 
+    private final static String STYLE_PLACEHOLDER = "STYLE_PLACEHOLDER";
+    private final static String NEXT_BLOCK_PLACEHOLDER = "<!-- NEXT_BLOCK_PLACEHOLDER -->";
+
     public static @NotNull String fill(@NotNull ThreePotState state, @NotNull ThreePotState newState, String output)
-            throws IOException, URISyntaxException, IllegalArgumentException {
-        String template = Files.readString(Paths.get(HISTORY_TEMPLATE_PATH));
+            throws IOException, IllegalArgumentException {
+        String divTemplate = Files.readString(Paths.get(HISTORY_BLOCK_DIV_PATH));
         int current_balance = state.getPot1() + state.getPot2() + (int)(state.getNumOfShares3a() * state.getPrice3a())
                 + (int)(state.getNumOfShares3b() * state.getPrice3b());
         int account3a = (int)(state.getNumOfShares3a() * state.getPrice3a());
@@ -47,7 +53,8 @@ public class HistoryUtil {
         int newAccount3a = (int)(newState.getNumOfShares3a() * newState.getPrice3a());
         int newAccount3b = (int)(newState.getNumOfShares3b() * newState.getPrice3b());
 
-        return template
+        return divTemplate
+                .replace(DATE_TIME, FormatUtil.getDateTimeString(LocalDateTime.now()))
                 .replace(CURRENT_BALANCE, FormatUtil.getDecimalFormatter().format(current_balance))
                 .replace(CURRENT_ACCOUNT_1, FormatUtil.getDecimalFormatter().format(state.getPot1()))
                 .replace(CURRENT_ACCOUNT_2, FormatUtil.getDecimalFormatter().format(state.getPot2()))
@@ -69,7 +76,22 @@ public class HistoryUtil {
                 .replace(REBALANCING_OUTPUT, output);
     }
 
-    public static void write(String configuration, @NotNull String text) throws IOException, URISyntaxException, IllegalArgumentException {
-        Files.write(Paths.get(configuration + ".html"), text.getBytes());
+    public static void add(String configKey, @NotNull String text) throws IOException, IllegalArgumentException {
+        Path filePath = Paths.get(getFilename(configKey));
+        String fileContent;
+        if (Files.exists(filePath)) {
+            fileContent = Files.readString(filePath);
+        } else {
+            String style = Files.readString(Paths.get(STYLE_PATH));
+            fileContent = Files.readString(Paths.get(HISTORY_TEMPLATE_PATH));
+            fileContent = fileContent.replace(STYLE_PLACEHOLDER, style);
+        }
+        text = NEXT_BLOCK_PLACEHOLDER + "\n" + text;
+        fileContent = fileContent.replace(NEXT_BLOCK_PLACEHOLDER, text);
+        Files.write(filePath, fileContent.getBytes());
+    }
+
+    public static String getFilename(String configKey) {
+        return configKey + ".html";
     }
 }

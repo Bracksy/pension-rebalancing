@@ -5,6 +5,10 @@ import java.text.DecimalFormatSymbols;
 
 public class DoubleTextField extends AbstractTextField {
 
+    public DoubleTextField(int width, int length, String hint, boolean showZero) {
+        super(width, length, hint, false, showZero);
+    }
+
     public DoubleTextField(int width, int length, String hint) {
         super(width, length, hint, false);
     }
@@ -38,7 +42,15 @@ public class DoubleTextField extends AbstractTextField {
     protected void updateText(String input) {
         try {
             float floatValue = Float.parseFloat(input);
-            setText(getDecimalFormatter().format(floatValue));
+            if (floatValue == 0) {
+                if (isShowZero()) {
+                    setText(getDecimalFormatter().format(floatValue));
+                } else {
+                    setText("");
+                }
+            } else {
+                setText(getDecimalFormatter().format(floatValue));
+            }
         } catch (NumberFormatException e) {
             // Falls die Zahl zu gross für 'long' ist
             clear();

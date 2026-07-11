@@ -1,71 +1,84 @@
 package ch.immi.pension;
 
-import ch.immi.pension.util.*;
+import ch.immi.pension.exception.DatabaseException;
 import ch.immi.pension.javafx.*;
-import ch.immi.pension.persistence.Data;
+import ch.immi.pension.persistence.*;
+import ch.immi.pension.persistence.model.Account;
+import ch.immi.pension.persistence.model.Configuration;
+import ch.immi.pension.persistence.model.Setting;
+import ch.immi.pension.util.*;
+import com.sai.javafx.calendar.FXCalendar;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import javafx.scene.web.WebView;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Application extends javafx.application.Application {
+public class MainDialog extends Pane {
     private final String ACCOUNT_HINT = "Kontostand";
     private final String PRICE_HINT = "Preis";
     private final String AMOUNT_HINT = "Anzahl";
 
     private final Data data = new Data();
 
-    private final ComboBox<Data.KeyValue> cbChoose = new ComboBox<>();
+    private final ComboBox<Configuration> cbChoose = new ComboBox<>();
 
     private final TitledBorder tbLastAccount = new TitledBorder("Letzter Kontostand");
     private final TitledBorder tbCurrentAccount = new TitledBorder("Aktueller Kontostand");
     private final TitledBorder tbNewAccount = new TitledBorder("Neuer Kontostand");
 
+    private final DateTextField txtLastKontoDate = new DateTextField();
+    private FXCalendar calLastKontoDate = new FXCalendar(txtLastKontoDate, Locale.GERMAN);
+    private final CalendarButton btnCalendar = new CalendarButton();
     private final IntegerTextField txtLastKonto1 = new IntegerTextField(70, 7, ACCOUNT_HINT);
     private final IntegerTextField txtLastKonto2 = new IntegerTextField(70, 7, ACCOUNT_HINT);
-    private final IntegerTextField txtLastNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtLastPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtLastNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtLastPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyLastKonto3a = new IntegerTextField(70, 7, true);
-    private final IntegerTextField txtLastNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtLastPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtLastNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtLastPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyLastKonto3b = new IntegerTextField(70, 7, true);
     private final Label lblLastVerteilung = new Label("40%/60%");
-    private final DoubleTextField txtLastHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
-    private final DoubleTextField txtLastHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final DoubleTextField txtLastHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
+    private final DoubleTextField txtLastHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
 
     private final IntegerTextField txtKonto1 = new IntegerTextField(80, 7, ACCOUNT_HINT);
     private final IntegerTextField txtKonto2 = new IntegerTextField(80, 7, ACCOUNT_HINT);
-    private final IntegerTextField txtNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyKonto3a = new IntegerTextField(70, 7, true);
-    private final IntegerTextField txtNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyKonto3b = new IntegerTextField(70, 7, true);
     private final Label lblVerteilung = new Label("40%/60%");
-    private final DoubleTextField txtHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
-    private final DoubleTextField txtHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final DoubleTextField txtHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
+    private final DoubleTextField txtHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
 
+    private final DateTextField txtNewKontoDate = new DateTextField();
     private final IntegerTextField txtNewKonto1 = new IntegerTextField(80, 7, ACCOUNT_HINT);
     private final IntegerTextField txtNewKonto2 = new IntegerTextField(80, 7, ACCOUNT_HINT);
-    private final IntegerTextField txtNewNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtNewPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtNewNumber3a = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtNewPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyNewKonto3a = new IntegerTextField(70, 7, true);
-    private final IntegerTextField txtNewNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT);
-    private final DoubleTextField txtNewPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final IntegerTextField txtNewNumber3b = new IntegerTextField(45, 4, AMOUNT_HINT, false);
+    private final DoubleTextField txtNewPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
     private final IntegerTextField txtReadonlyNewKonto3b = new IntegerTextField(70, 7, true);
     private final Label lblNewVerteilung = new Label("40%/60%");
-    private final DoubleTextField txtNewHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT);
-    private final DoubleTextField txtNewHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT);
+    private final DoubleTextField txtNewHighestPrice3a = new DoubleTextField(60, 6, PRICE_HINT, false);
+    private final DoubleTextField txtNewHighestPrice3b = new DoubleTextField(60, 6, PRICE_HINT, false);
 
     private final Label lblProfit2 = new Label("5%");
     private final Label lblProfit3a = new Label("5%");
@@ -83,26 +96,56 @@ public class Application extends javafx.application.Application {
 
     private final TextField txtKonto3aTicker = new TextField();
     private final TextField txtKonto3bTicker = new TextField();
-    private final IntegerTextField txtRebalancing3aPercent = new IntegerTextField(40, 3, "Prozent");
-    private final IntegerTextField txtRebalancing3bPercent = new IntegerTextField(40, 3, "Prozent");
+    private final IntegerTextField txtRebalancing3aPercent = new IntegerTextField(40, 3, "Prozent", false);
+    private final IntegerTextField txtRebalancing3bPercent = new IntegerTextField(40, 3, "Prozent", false);
     private final IntegerTextField txtRebalancingThreshold = new IntegerTextField(40, 3, "Prozent");
 
-    private final TextArea txtAusgabeGross = new TextArea();
     private final WebView webViewAusgabe = new WebView();
-    private StackPane outputStack;
 
-    private String selectedKey = null;
-    private Stage mainStage;
+    private Configuration selectedConfiguration = null;
+    private Stage dialogStage;
+
+    private DatabaseSession currentSession = null;
 
     private enum Type {
         KAUF, VERKAUF
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.mainStage = primaryStage;
-        primaryStage.setTitle("Rebalancing berechnen..");
+    public final void show(final Stage pPrimaryStage, double pWidth, double pHeight) {
+        dialogStage = pPrimaryStage;
+        boolean openAsDialog = pPrimaryStage.isShowing();
+        if (openAsDialog) {
+            dialogStage = new Stage();
+            dialogStage.getIcons().addAll(pPrimaryStage.getIcons());
+        }
 
+        dialogStage.setMinHeight(32);
+        dialogStage.setMaxHeight(Double.MAX_VALUE);
+
+        dialogStage.setMinWidth(20);
+        dialogStage.setMaxWidth(Double.MAX_VALUE);
+
+        dialogStage.setOnShown(_ -> JavaFxUtil.centerDialog(pPrimaryStage, dialogStage));
+
+        if (pWidth >= 0) {
+            dialogStage.setWidth(pWidth);
+        }
+        if (pHeight >= 0) {
+            dialogStage.setHeight(pHeight);
+        }
+
+        if (createDialogContent()) {
+            dialogStage.setTitle("Rebalancing berechnen..");
+
+            if (openAsDialog) {
+                dialogStage.showAndWait();
+            } else {
+                dialogStage.show();
+            }
+        }
+    }
+
+    private boolean createDialogContent() {
         // Haupt-Layout: Vertikal gestapelt (Oben: Spalten, Mitte: Button, Unten: Textfeld)
         VBox rootLayout = new VBox(10);
         rootLayout.setPadding(new Insets(15));
@@ -119,9 +162,7 @@ public class Application extends javafx.application.Application {
         VBox leftBox = new VBox(10);
         Button btnTransfer = new Button("Daten übernehmen");
         btnTransfer.setMaxWidth(Integer.MAX_VALUE);
-        btnTransfer.setOnAction(event -> {
-            doTransfer();
-        });
+        btnTransfer.setOnAction(_ -> doTransfer());
         leftBox.getChildren().addAll(lastAccountWithHighestBox(), btnTransfer, accountWithHighestBox());
 
         VBox rechterBereich = parameterBox();
@@ -137,7 +178,7 @@ public class Application extends javafx.application.Application {
         btnAnalysis.setMaxWidth(Double.MAX_VALUE);
         btnAnalysis.setPrefHeight(35);
         HBox.setHgrow(btnAnalysis, Priority.ALWAYS);
-        btnAnalysis.setOnAction(event -> {
+        btnAnalysis.setOnAction(_ -> {
             doAnalysis();
             recalculateAccount3Percentage();
         });
@@ -146,16 +187,11 @@ public class Application extends javafx.application.Application {
         btnHistory.setMaxWidth(Double.MAX_VALUE);
         btnHistory.setPrefHeight(35);
         HBox.setHgrow(btnHistory, Priority.ALWAYS);
-        btnHistory.setOnAction(event -> doHistory());
-
-        ToggleButton btnToggleWeb = new ToggleButton("Web");
-        btnToggleWeb.setMaxWidth(Double.MAX_VALUE);
-        btnToggleWeb.setPrefHeight(35);
-        btnToggleWeb.setOnAction(e -> showWebView(btnToggleWeb.isSelected()));
+        btnHistory.setOnAction(_ -> doHistory());
 
         HBox buttonBox = new HBox(5);
         buttonBox.setMaxWidth(Double.MAX_VALUE);
-        buttonBox.getChildren().addAll(btnAnalysis, btnHistory, btnToggleWeb);
+        buttonBox.getChildren().addAll(btnAnalysis, btnHistory);
 
         // ==========================================
         // UNTERER BEREICH: Grosses Multiline-Textfeld
@@ -163,63 +199,67 @@ public class Application extends javafx.application.Application {
         HBox bottomBox = new HBox(5);
         bottomBox.setAlignment(Pos.TOP_LEFT);
 
-        bottomBox.getChildren().addAll(outputPane(), newAccountWithHighestBox());
+        bottomBox.getChildren().addAll(webViewAusgabe(), newAccountWithHighestBox());
 
         // Alles in das Haupt-Layout einfügen (von oben nach unten gestapelt)
         rootLayout.getChildren().addAll(chooseBox, topBox, buttonBox, bottomBox);
 
         // Fenstergrösse angepasst (Breite: 760, Höhe: 700 wegen dem neuen Textfeld)
-        Scene scene = new Scene(rootLayout, 900, 700);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        Scene scene = new Scene(rootLayout);
+        dialogStage.setScene(scene);
+        dialogStage.show();
 
-        readValuesFromRegistry();
+        load(this.selectedConfiguration);
+
+        return true;
     }
 
     private HBox chooseBox() {
         HBox chooseBox = new HBox(5);
-        cbChoose.setEditable(true);
-        cbChoose.setMinWidth(300);
-        cbChoose.setItems(FXCollections.observableList(getConfigurationLabels()));
+        cbChoose.setEditable(false);
+        cbChoose.setMinWidth(400);
+        cbChoose.setItems(FXCollections.observableList(getConfigurations()));
         cbChoose.setConverter(new StringConverter<>() {
             @Override
-            public String toString(Data.KeyValue object) {
-                return object == null ? "" : object.getValue(); // Zeigt den Value an
+            public String toString(Configuration configuration) {
+                return configuration == null ? "" : configuration.getName(); // Zeigt den Value an
             }
 
             @Override
-            public Data.KeyValue fromString(String string) {
+            public Configuration fromString(String string) {
                 return cbChoose.getItems().stream()
-                        .filter(item -> item.getValue().equals(string))
+                        .filter(item -> item.getName().equals(string))
                         .findFirst()
                         .orElse(null);
             }
         });
 
-        selectedKey = data.getString(Data.BASEPATH, "lastSelectedKey");
-        getConfiguration(selectedKey).ifPresent(selectedKeyValue -> {
-            cbChoose.getSelectionModel().select(selectedKeyValue);
-            doLoadConfig(selectedKeyValue);
-        });
+        Long selectedConfigId = data.getLong(Data.BASEPATH, "lastConfigId");
+        if (selectedConfigId != null) {
+            getConfiguration(selectedConfigId).ifPresent(this::doLoadConfig);
+        }
 
         Button btnDelete = new DeleteButton();
-        chooseBox.getChildren().addAll(cbChoose, btnDelete);
+        Button btnNew = new NewButton();
+        chooseBox.getChildren().addAll(cbChoose, btnNew, btnDelete);
 
-        cbChoose.getSelectionModel().selectedItemProperty().addListener((observable,
-                                                                         oldItem, newItem) -> {
+        cbChoose.getSelectionModel().selectedItemProperty().addListener((_,
+                                                                         _, newItem) -> {
             if (newItem != null) {
                 doLoadConfig(newItem);
-            } else {
-                String newConfigText = cbChoose.getEditor().getText();
-                if (newConfigText != null && !newConfigText.isBlank()) {
-                    doNewConfig(newConfigText);
-                }
             }
         });
-        btnDelete.setOnAction(event -> {
-            Data.KeyValue keyValueToDelete = cbChoose.getValue();
-            if (keyValueToDelete != null) {
-                doDeleteConfig(keyValueToDelete);
+        btnNew.setOnAction(_ -> {
+            ConfigNamePopup configNamePopup = new ConfigNamePopup(this.dialogStage, "Neue Konfiguration", "Name");
+            String name = configNamePopup.showAndGetResult();
+            if (name != null) {
+                doNewConfig(name);
+            }
+        });
+        btnDelete.setOnAction(_ -> {
+            Configuration configurationToDelete = cbChoose.getValue();
+            if (configurationToDelete != null) {
+                doDeleteConfig(configurationToDelete);
             }
         });
 
@@ -244,37 +284,50 @@ public class Application extends javafx.application.Application {
         GridPane gridLinks = new StandartGridPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        gridLinks.add(new Label("Konto 1:"), 0, 0);
-        gridLinks.add(txtLastKonto1, 3, 0);
-        gridLinks.add(new Label("CHF"), 4, 0);
+        btnCalendar.setOnMouseClicked(_ -> {
+            calLastKontoDate.show();
+        });
+
+        gridLinks.add(new Label("Datum:"), 0, 0);
+        gridLinks.add(txtLastKontoDate, 3, 0);
+        gridLinks.add(btnCalendar, 4, 0);
+        txtLastKontoDate.textProperty().addListener((_, oldText, newText) -> {
+            if (newText != null && !newText.isEmpty() && !newText.equals(oldText)) {
+                update(this.selectedConfiguration);
+            }
+        });
+
+        gridLinks.add(new Label("Konto 1:"), 0, 1);
+        gridLinks.add(txtLastKonto1, 3, 1);
+        gridLinks.add(new Label("CHF"), 4, 1);
         addAutoSaveListener(txtLastKonto1);
         addUpdateListener(txtLastKonto1);
 
-        gridLinks.add(new Label("Konto 2:"), 0, 1);
-        gridLinks.add(txtLastKonto2, 3, 1);
-        gridLinks.add(new Label("CHF"), 4, 1);
+        gridLinks.add(new Label("Konto 2:"), 0, 2);
+        gridLinks.add(txtLastKonto2, 3, 2);
+        gridLinks.add(new Label("CHF"), 4, 2);
         addAutoSaveListener(txtLastKonto2);
         addUpdateListener(txtLastKonto2);
 
-        gridLinks.add(new Label("Konto 3a:"), 0, 2);
-        gridLinks.add(txtLastNumber3a, 1, 2);
-        gridLinks.add(txtLastPrice3a, 2, 2);
+        gridLinks.add(new Label("Konto 3a:"), 0, 3);
+        gridLinks.add(txtLastNumber3a, 1, 3);
+        gridLinks.add(txtLastPrice3a, 2, 3);
         addUpdateListener(txtLastPrice3a);
-        gridLinks.add(txtReadonlyLastKonto3a, 3, 2);
-        gridLinks.add(new Label("CHF"), 4, 2);
+        gridLinks.add(txtReadonlyLastKonto3a, 3, 3);
+        gridLinks.add(new Label("CHF"), 4, 3);
         addAutoSaveListener(txtLastNumber3a, txtLastPrice3a);
         addUpdateListener(txtLastNumber3a, txtLastPrice3a);
 
-        gridLinks.add(new Label("Konto 3b:"), 0, 3);
-        gridLinks.add(txtLastNumber3b, 1, 3);
-        gridLinks.add(txtLastPrice3b, 2, 3);
+        gridLinks.add(new Label("Konto 3b:"), 0, 4);
+        gridLinks.add(txtLastNumber3b, 1, 4);
+        gridLinks.add(txtLastPrice3b, 2, 4);
         addUpdateListener(txtLastPrice3b);
-        gridLinks.add(txtReadonlyLastKonto3b, 3, 3);
-        gridLinks.add(new Label("CHF"), 4, 3);
+        gridLinks.add(txtReadonlyLastKonto3b, 3, 4);
+        gridLinks.add(new Label("CHF"), 4, 4);
         addAutoSaveListener(txtLastNumber3b, txtLastPrice3b);
         addUpdateListener(txtLastNumber3b, txtLastPrice3b);
 
-        gridLinks.add(lblLastVerteilung, 3, 4);
+        gridLinks.add(lblLastVerteilung, 3, 5);
 
         tbLastAccount.getChildren().add(gridLinks);
 
@@ -295,19 +348,21 @@ public class Application extends javafx.application.Application {
 
         gridKonto3.add(txtLastHighestPrice3a, 0, 2);
         gridKonto3.add(new Label("CHF"), 1, 2);
-        txtLastHighestPrice3a.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtLastHighestPrice3a.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtLastHighestPrice3a", txtLastHighestPrice3a.getDouble());
+                selectedConfiguration.getLastAccount().setHighest3a(txtLastHighestPrice3a.getDouble());
+                update(selectedConfiguration);
             }
         });
 
         gridKonto3.add(txtLastHighestPrice3b, 0, 3);
         gridKonto3.add(new Label("CHF"), 1, 3);
-        txtLastHighestPrice3b.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtLastHighestPrice3b.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtLastHighestPrice3b", txtLastHighestPrice3b.getDouble());
+                selectedConfiguration.getLastAccount().setHighest3b(txtLastHighestPrice3b.getDouble());
+                update(selectedConfiguration);
             }
         });
         tbKonto3HighestPrice.getChildren().add(gridKonto3);
@@ -385,19 +440,21 @@ public class Application extends javafx.application.Application {
 
         gridKonto3.add(txtHighestPrice3a, 0, 2);
         gridKonto3.add(new Label("CHF"), 1, 2);
-        txtHighestPrice3a.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtHighestPrice3a.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtHighestPrice3a", txtHighestPrice3a.getDouble());
+                selectedConfiguration.getCurrentAccount().setHighest3a(txtHighestPrice3a.getDouble());
+                update(selectedConfiguration);
             }
         });
 
         gridKonto3.add(txtHighestPrice3b, 0, 3);
         gridKonto3.add(new Label("CHF"), 1, 3);
-        txtHighestPrice3b.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtHighestPrice3b.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtHighestPrice3b", txtHighestPrice3b.getDouble());
+                selectedConfiguration.getCurrentAccount().setHighest3b(txtHighestPrice3b.getDouble());
+                update(selectedConfiguration);
             }
         });
         tbKonto3HighestPrice.getChildren().add(gridKonto3);
@@ -460,40 +517,10 @@ public class Application extends javafx.application.Application {
         return rechterBereich;
     }
 
-    private TextArea textAusgabeArea() {
-        txtAusgabeGross.setPromptText("Rebalancingvorschlag erscheint hier...");
-        txtAusgabeGross.setPrefHeight(210);
-        txtAusgabeGross.setWrapText(true);
-        return txtAusgabeGross;
-    }
-
-    private StackPane outputPane() {
-        textAusgabeArea(); // ensure text area configured
+    private WebView webViewAusgabe() {
         webViewAusgabe.setPrefHeight(210);
-        webViewAusgabe.setVisible(false);
-
-        outputStack = new StackPane();
-        outputStack.getChildren().addAll(txtAusgabeGross, webViewAusgabe);
-        return outputStack;
-    }
-
-    private void showWebView(boolean show) {
-        if (outputStack == null) return;
-        if (show) {
-            String text = txtAusgabeGross.getText();
-            String html = "<pre>" + escapeHtml(text) + "</pre>";
-            webViewAusgabe.getEngine().loadContent(html);
-        } else {
-            // clear web engine content to free resources
-            webViewAusgabe.getEngine().loadContent("");
-        }
-        webViewAusgabe.setVisible(show);
-        txtAusgabeGross.setVisible(!show);
-    }
-
-    private String escapeHtml(String s) {
-        if (s == null) return "";
-        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        webViewAusgabe.setPrefWidth(500);
+        return webViewAusgabe;
     }
 
     private VBox newAccountWithHighestBox() {
@@ -505,7 +532,7 @@ public class Application extends javafx.application.Application {
         Button btnHandle = new Button("Übernehmen..");
         btnHandle.setMaxWidth(Double.MAX_VALUE);
         btnHandle.setPrefHeight(35);
-        btnHandle.setOnAction(event -> doAccept());
+        btnHandle.setOnAction(_ -> doAccept());
 
         vBox.getChildren().addAll(hBox, btnHandle);
 
@@ -519,33 +546,36 @@ public class Application extends javafx.application.Application {
         GridPane gridLinks = new StandartGridPane();
         gridLinks.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        gridLinks.add(new Label("Konto 1:"), 0, 0);
-        gridLinks.add(txtNewKonto1, 3, 0);
-        gridLinks.add(new Label("CHF"), 4, 0);
+        gridLinks.add(new Label("Datum:"), 0, 0);
+        gridLinks.add(txtNewKontoDate, 3, 0);
+
+        gridLinks.add(new Label("Konto 1:"), 0, 1);
+        gridLinks.add(txtNewKonto1, 3, 1);
+        gridLinks.add(new Label("CHF"), 4, 1);
         addAutoSaveListener(txtNewKonto1);
 
-        gridLinks.add(new Label("Konto 2:"), 0, 1);
-        gridLinks.add(txtNewKonto2, 3, 1);
-        gridLinks.add(new Label("CHF"), 4, 1);
+        gridLinks.add(new Label("Konto 2:"), 0, 2);
+        gridLinks.add(txtNewKonto2, 3, 2);
+        gridLinks.add(new Label("CHF"), 4, 2);
         addAutoSaveListener(txtNewKonto2);
 
-        gridLinks.add(new Label("Konto 3a:"), 0, 2);
-        gridLinks.add(txtNewNumber3a, 1, 2);
-        gridLinks.add(txtNewPrice3a, 2, 2);
-        gridLinks.add(txtReadonlyNewKonto3a, 3, 2);
-        gridLinks.add(new Label("CHF"), 4, 2);
+        gridLinks.add(new Label("Konto 3a:"), 0, 3);
+        gridLinks.add(txtNewNumber3a, 1, 3);
+        gridLinks.add(txtNewPrice3a, 2, 3);
+        gridLinks.add(txtReadonlyNewKonto3a, 3, 3);
+        gridLinks.add(new Label("CHF"), 4, 3);
         addAutoSaveListener(txtNewNumber3a, txtNewPrice3a);
         addUpdateListener(txtNewNumber3a, txtNewPrice3a);
 
-        gridLinks.add(new Label("Konto 3b:"), 0, 3);
-        gridLinks.add(txtNewNumber3b, 1, 3);
-        gridLinks.add(txtNewPrice3b, 2, 3);
-        gridLinks.add(txtReadonlyNewKonto3b, 3, 3);
-        gridLinks.add(new Label("CHF"), 4, 3);
+        gridLinks.add(new Label("Konto 3b:"), 0, 4);
+        gridLinks.add(txtNewNumber3b, 1, 4);
+        gridLinks.add(txtNewPrice3b, 2, 4);
+        gridLinks.add(txtReadonlyNewKonto3b, 3, 4);
+        gridLinks.add(new Label("CHF"), 4, 4);
         addAutoSaveListener(txtNewNumber3b, txtNewPrice3b);
         addUpdateListener(txtNewNumber3b, txtNewPrice3b);
 
-        gridLinks.add(lblNewVerteilung, 3, 4);
+        gridLinks.add(lblNewVerteilung, 3, 5);
 
         tbNewAccount.getChildren().add(gridLinks);
 
@@ -566,19 +596,21 @@ public class Application extends javafx.application.Application {
 
         gridKonto3.add(txtNewHighestPrice3a, 0, 2);
         gridKonto3.add(new Label("CHF"), 1, 2);
-        txtNewHighestPrice3a.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtNewHighestPrice3a.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtNewHighestPrice3a", txtNewHighestPrice3a.getDouble());
+                selectedConfiguration.getNewAccount().setHighest3a(txtNewHighestPrice3a.getDouble());
+                update(selectedConfiguration);
             }
         });
 
         gridKonto3.add(txtNewHighestPrice3b, 0, 3);
         gridKonto3.add(new Label("CHF"), 1, 3);
-        txtNewHighestPrice3b.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        txtNewHighestPrice3b.focusedProperty().addListener((_, _, newValue) -> {
             // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
             if (!newValue) {
-                data.store(selectedKey, "txtNewHighestPrice3b", txtNewHighestPrice3b.getDouble());
+                selectedConfiguration.getNewAccount().setHighest3b(txtNewHighestPrice3b.getDouble());
+                update(selectedConfiguration);
             }
         });
         tbKonto3HighestPrice.getChildren().add(gridKonto3);
@@ -588,11 +620,11 @@ public class Application extends javafx.application.Application {
 
     private void addAutoSaveListener(TextField ... textFields) {
         for (TextField tf: textFields) {
-            tf.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            tf.focusedProperty().addListener((_, _, newValue) -> {
                 // 'newValue' ist true, wenn das Feld betreten wird, und false, wenn es verlassen wird
                 if (!newValue) {
                     // Code wird ausgeführt, wenn das Feld VERLASSEN wird
-                    storeValuesIntoRegistry();
+                    update(selectedConfiguration);
                 }
             });
         }
@@ -600,7 +632,7 @@ public class Application extends javafx.application.Application {
 
     private void addUpdateListener(TextField ... textFields) {
         for (TextField tf : textFields) {
-            tf.textProperty().addListener((observable, oldText, newText) -> {
+            tf.textProperty().addListener((_, _, newText) -> {
                 if (newText != null && !newText.isEmpty()) {
                     recalculateAccount3();
                     recalculateAccount3Percentage();
@@ -613,39 +645,37 @@ public class Application extends javafx.application.Application {
     }
 
     // Functionalities
-    private void doLoadConfig(Data.KeyValue selectedKeyValue) {
-        data.store(Data.BASEPATH, "lastSelectedKey", selectedKeyValue.getKey());
-        data.store(selectedKeyValue.getKey(), "label", selectedKeyValue.getValue());
-        selectedKey = selectedKeyValue.getKey();
+    private void doLoadConfig(@NotNull Configuration configuration) {
+        selectedConfiguration = configuration;
+        cbChoose.getSelectionModel().select(configuration);
+        data.store(Data.BASEPATH, "lastConfigId", configuration.getId());
 
-        readValuesFromRegistry();
+        load(this.selectedConfiguration);
     }
 
-    private void doNewConfig(String newValue) {
-        Data.KeyValue changedKeyValue = new Data.KeyValue(getSelectedKey(newValue), newValue);
-        cbChoose.getItems().add(changedKeyValue);
-        cbChoose.getSelectionModel().select(changedKeyValue);
-        doLoadConfig(changedKeyValue);
+    private void doNewConfig(String newName) {
+        if (newName != null && !newName.isBlank()) {
+            Configuration configuration = createNewConfiguration(newName);
 
-        readValuesFromRegistry();
-        storeValuesIntoRegistry();
+            cbChoose.getItems().add(configuration);
+            cbChoose.getSelectionModel().select(configuration);
+            doLoadConfig(configuration);
+        }
     }
 
-    private void doDeleteConfig(Data.KeyValue selectedKeyValue) {
+    private void doDeleteConfig(Configuration configuration) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Konfiguration löschen");
-        alert.setHeaderText(String.format("<%s> wird gelöscht!", selectedKeyValue.getValue()));
+        alert.setHeaderText(String.format("<%s> wird gelöscht!", configuration.getName()));
         alert.setContentText("Sind Sie sicher?");
-        alert.initOwner(mainStage);
+        alert.initOwner(this.dialogStage);
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            data.deleteConfiguration(selectedKeyValue.getKey());
-            cbChoose.getItems().remove(selectedKeyValue);
+            delete(configuration);
+            cbChoose.getItems().remove(configuration);
             if (!getConfigurationLabels().isEmpty()) {
-                Data.KeyValue newSelectedKeyValue = getConfigurationLabels().getFirst();
-                cbChoose.getSelectionModel().select(newSelectedKeyValue);
-                doLoadConfig(newSelectedKeyValue);
+                cbChoose.getItems().stream().findFirst().ifPresent(this::doLoadConfig);
             }
         }
     }
@@ -671,6 +701,7 @@ public class Application extends javafx.application.Application {
         ThreePotState state = getRebalancedState();
 
         // Do calculation
+        txtNewKontoDate.setLocalDate(LocalDate.now());
         txtNewKonto1.setInt(state.getPot1());
         txtNewKonto2.setInt(state.getPot2());
         txtNewNumber3a.setInt(state.getNumOfShares3a());
@@ -682,19 +713,15 @@ public class Application extends javafx.application.Application {
         showText(state);
 
         updateTitle();
-        storeValuesIntoRegistry();
-
-        // Write history
-        try {
-            String content = HistoryUtil.fill(getCurrentState(), getNewState(), txtAusgabeGross.getText());
-            HistoryUtil.write(selectedKey, content);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        update(selectedConfiguration);
     }
 
     private void doHistory() {
-        System.out.println("do History");
+        HtmlPopup popup = new HtmlPopup(
+                this.dialogStage,
+                getSelectedKey());
+
+        popup.show();
     }
 
     private void doAccept() {
@@ -706,16 +733,19 @@ public class Application extends javafx.application.Application {
         txtLastNumber3b.setInt(txtNewNumber3b.getInt());
         txtLastPrice3b.setDouble(txtNewPrice3b.getDouble());
 
-        storeValuesIntoRegistry();
+        update(selectedConfiguration);
         updateTransferred();
 
-        // Write history
-        try {
-            String content = HistoryUtil.fill(getCurrentState(), getNewState(), txtAusgabeGross.getText());
-            HistoryUtil.write(selectedKey, content);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        webViewAusgabe.getEngine().getLoadWorker().stateProperty().addListener((_, _, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                try {
+                    String content = HistoryUtil.fill(getCurrentState(), getNewState(), getAusgabeHtml());
+                    HistoryUtil.add(getSelectedKey(), content);
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private ThreePotState getCurrentState() {
@@ -758,98 +788,121 @@ public class Application extends javafx.application.Application {
         return data.getChildrenValues(Data.BASEPATH,"label");
     }
 
-    private Optional<Data.KeyValue> getConfiguration(String selectedKey) {
-        return data.getChildrenValues(Data.BASEPATH,"label").stream()
-                .filter(keyValue -> keyValue.getKey().equals(selectedKey)).findFirst();
-    }
-
-    private String getSelectedKey(String selectedString) {
-        if (selectedString == null) {
+    private @Nullable String getSelectedKey() {
+        if (selectedConfiguration == null) {
             return null;
         }
-        return selectedString.replace(" ", "").replace("/", "_");
+        return selectedConfiguration.getName().replace(" ", "").replace("/", "_");
     }
 
-    private void storeValuesIntoRegistry() {
-        data.store(selectedKey, "txtLastKonto1", txtLastKonto1.getInt());
-        data.store(selectedKey, "txtLastKonto2", txtLastKonto2.getInt());
-        data.store(selectedKey, "txtLastAmount3a", txtLastNumber3a.getInt());
-        data.store(selectedKey, "txtLastPrice3a", txtLastPrice3a.getDouble());
-        data.store(selectedKey, "txtLastAmount3b", txtLastNumber3b.getInt());
-        data.store(selectedKey, "txtLastPrice3b", txtLastPrice3b.getDouble());
+    private void fillValues(Configuration configuration) {
+        if (configuration != null) {
+            configuration.getLastAccount().setDate(txtLastKontoDate.getLocalDate());
+            configuration.getLastAccount().setAccount1(txtLastKonto1.getInt());
+            configuration.getLastAccount().setAccount2(txtLastKonto2.getInt());
+            configuration.getLastAccount().setNumber3a(txtLastNumber3a.getInt());
+            configuration.getLastAccount().setPrice3a(txtLastPrice3a.getDouble());
+            configuration.getLastAccount().setNumber3b(txtLastNumber3b.getInt());
+            configuration.getLastAccount().setPrice3b(txtLastPrice3b.getDouble());
 
-        data.store(selectedKey, "txtKonto1", txtKonto1.getInt());
-        data.store(selectedKey, "txtKonto2", txtKonto2.getInt());
-        data.store(selectedKey, "txtAmount3a", txtNumber3a.getInt());
-        data.store(selectedKey, "txtPrice3a", txtPrice3a.getDouble());
-        data.store(selectedKey, "txtAmount3b", txtNumber3b.getInt());
-        data.store(selectedKey, "txtPrice3b", txtPrice3b.getDouble());
+            configuration.getCurrentAccount().setAccount1(txtKonto1.getInt());
+            configuration.getCurrentAccount().setAccount2(txtKonto2.getInt());
+            configuration.getCurrentAccount().setNumber3a(txtNumber3a.getInt());
+            configuration.getCurrentAccount().setPrice3a(txtPrice3a.getDouble());
+            configuration.getCurrentAccount().setNumber3b(txtNumber3b.getInt());
+            configuration.getCurrentAccount().setPrice3b(txtPrice3b.getDouble());
 
-        data.store(selectedKey, "txtNewKonto1", txtNewKonto1.getInt());
-        data.store(selectedKey, "txtNewKonto2", txtNewKonto2.getInt());
-        data.store(selectedKey, "txtNewAmount3a", txtNewNumber3a.getInt());
-        data.store(selectedKey, "txtNewPrice3a", txtNewPrice3a.getDouble());
-        data.store(selectedKey, "txtNewAmount3b", txtNewNumber3b.getInt());
-        data.store(selectedKey, "txtNewPrice3b", txtNewPrice3b.getDouble());
+            configuration.getNewAccount().setDate(txtNewKontoDate.getLocalDate());
+            configuration.getNewAccount().setAccount1(txtNewKonto1.getInt());
+            configuration.getNewAccount().setAccount2(txtNewKonto2.getInt());
+            configuration.getNewAccount().setNumber3a(txtNewNumber3a.getInt());
+            configuration.getNewAccount().setPrice3a(txtNewPrice3a.getDouble());
+            configuration.getNewAccount().setNumber3b(txtNewNumber3b.getInt());
+            configuration.getNewAccount().setPrice3b(txtNewPrice3b.getDouble());
 
-        data.store(selectedKey, "txtBezugJahr", txtBezugJahr.getInt());
+            configuration.getSetting().setAnnualWithdrawal(txtBezugJahr.getInt());
+            configuration.getSetting().setTicker3a(txtKonto3aTicker.getText());
+            configuration.getSetting().setTicker3b(txtKonto3bTicker.getText());
+            configuration.getSetting().setPercentage3a(txtRebalancing3aPercent.getInt());
+            configuration.getSetting().setPercentage3b(txtRebalancing3bPercent.getInt());
+            configuration.getSetting().setThresholdPercentage(txtRebalancingThreshold.getInt());
 
-        data.store(selectedKey, "txtKonto3aTicker", txtKonto3aTicker.getText());
-        data.store(selectedKey, "txtKonto3bTicker", txtKonto3bTicker.getText());
-        data.store(selectedKey, "txtRebalancing3aPercent", txtRebalancing3aPercent.getInt());
-        data.store(selectedKey, "txtRebalancing3bPercent", txtRebalancing3bPercent.getInt());
-        data.store(selectedKey, "txtRebalancingThreshold", txtRebalancingThreshold.getInt());
+            configuration.setBalancingText(getAusgabeHtml());
 
-        data.store(selectedKey, "txtAusgabeGross", txtAusgabeGross.getText());
-
-        updateTransferred();
+            updateTransferred();
+        }
     }
 
-    private void readValuesFromRegistry() {
-        txtLastKonto1.setInt(data.getInteger(selectedKey, "txtLastKonto1"));
-        txtLastKonto2.setInt(data.getInteger(selectedKey, "txtLastKonto2"));
-        txtLastNumber3a.setInt(data.getInteger(selectedKey, "txtLastAmount3a"));
-        txtLastPrice3a.setDouble(data.getDouble(selectedKey, "txtLastPrice3a"));
-        txtLastNumber3b.setInt(data.getInteger(selectedKey, "txtLastAmount3b"));
-        txtLastPrice3b.setDouble(data.getDouble(selectedKey, "txtLastPrice3b"));
+    private void load(Configuration configuration) {
+        if (configuration != null) {
+            LocalDate lastDate = configuration.getLastAccount().getDate();
+            if (lastDate != null) {
+                txtLastKontoDate.setLocalDate(lastDate);
+                btnCalendar.setVisible(false);
+                btnCalendar.setManaged(false);
+            } else {
+                txtLastKontoDate.setText("");
+                btnCalendar.setVisible(true);
+                btnCalendar.setManaged(true);
+            }
+            txtLastKonto1.setInt(configuration.getLastAccount().getAccount1());
+            txtLastKonto2.setInt(configuration.getLastAccount().getAccount2());
+            txtLastNumber3a.setInt(configuration.getLastAccount().getNumber3a());
+            txtLastPrice3a.setDouble(configuration.getLastAccount().getPrice3a());
+            txtLastNumber3b.setInt(configuration.getLastAccount().getNumber3b());
+            txtLastPrice3b.setDouble(configuration.getLastAccount().getPrice3b());
+            txtLastHighestPrice3a.setDouble(configuration.getLastAccount().getHighest3a());
+            txtLastHighestPrice3b.setDouble(configuration.getLastAccount().getHighest3b());
 
-        txtKonto1.setInt(data.getInteger(selectedKey, "txtKonto1"));
-        txtKonto2.setInt(data.getInteger(selectedKey, "txtKonto2"));
-        txtNumber3a.setInt(data.getInteger(selectedKey, "txtAmount3a"));
-        txtPrice3a.setDouble(data.getDouble(selectedKey, "txtPrice3a"));
-        txtNumber3b.setInt(data.getInteger(selectedKey, "txtAmount3b"));
-        txtPrice3b.setDouble(data.getDouble(selectedKey, "txtPrice3b"));
+            txtKonto1.setInt(configuration.getCurrentAccount().getAccount1());
+            txtKonto2.setInt(configuration.getCurrentAccount().getAccount2());
+            txtNumber3a.setInt(configuration.getCurrentAccount().getNumber3a());
+            txtPrice3a.setDouble(configuration.getCurrentAccount().getPrice3a());
+            txtNumber3b.setInt(configuration.getCurrentAccount().getNumber3b());
+            txtPrice3b.setDouble(configuration.getCurrentAccount().getPrice3b());
+            txtHighestPrice3a.setDouble(configuration.getCurrentAccount().getHighest3a());
+            txtHighestPrice3b.setDouble(configuration.getCurrentAccount().getHighest3b());
 
-        txtNewKonto1.setInt(data.getInteger(selectedKey, "txtNewKonto1"));
-        txtNewKonto2.setInt(data.getInteger(selectedKey, "txtNewKonto2"));
-        txtNewNumber3a.setInt(data.getInteger(selectedKey, "txtNewAmount3a"));
-        txtNewPrice3a.setDouble(data.getDouble(selectedKey, "txtNewPrice3a"));
-        txtNewNumber3b.setInt(data.getInteger(selectedKey, "txtNewAmount3b"));
-        txtNewPrice3b.setDouble(data.getDouble(selectedKey, "txtNewPrice3b"));
+            txtNewKontoDate.setLocalDate(configuration.getNewAccount().getDate());
+            txtNewKonto1.setInt(configuration.getNewAccount().getAccount1());
+            txtNewKonto2.setInt(configuration.getNewAccount().getAccount2());
+            txtNewNumber3a.setInt(configuration.getNewAccount().getNumber3a());
+            txtNewPrice3a.setDouble(configuration.getNewAccount().getPrice3a());
+            txtNewNumber3b.setInt(configuration.getNewAccount().getNumber3b());
+            txtNewPrice3b.setDouble(configuration.getNewAccount().getPrice3b());
+            txtNewHighestPrice3a.setDouble(configuration.getNewAccount().getHighest3a());
+            txtNewHighestPrice3b.setDouble(configuration.getNewAccount().getHighest3b());
 
-        txtBezugJahr.setInt(data.getInteger(selectedKey, "txtBezugJahr"));
+            txtBezugJahr.setInt(configuration.getSetting().getAnnualWithdrawal());
 
-        txtHighestPrice3a.setDouble(data.getDouble(selectedKey, "txtHighestPrice3a"));
-        txtHighestPrice3b.setDouble(data.getDouble(selectedKey, "txtHighestPrice3b"));
+            String txtKonto3aTickerText = configuration.getSetting().getTicker3a();
+            if (txtKonto3aTickerText != null) {
+                txtKonto3aTicker.setText(txtKonto3aTickerText);
+            }
+            String txtKonto3bTickerText = configuration.getSetting().getTicker3b();
+            if (txtKonto3bTickerText != null) {
+                txtKonto3bTicker.setText(txtKonto3bTickerText);
+            }
+            txtRebalancing3aPercent.setInt(configuration.getSetting().getPercentage3a());
+            txtRebalancing3bPercent.setInt(configuration.getSetting().getPercentage3b());
+            txtRebalancingThreshold.setInt(configuration.getSetting().getThresholdPercentage());
 
-        String txtKonto3aTickerText = data.getString(selectedKey,"txtKonto3aTicker");
-        if (txtKonto3aTickerText != null) {
-            txtKonto3aTicker.setText(txtKonto3aTickerText);
+            String txtAusgabeGrossText = configuration.getBalancingText();
+            webViewAusgabe.setAccessibleText(Objects.requireNonNullElse(txtAusgabeGrossText, ""));
+
+            recalculateAccount3();
+            updateTitle();
+            updateTransferred();
         }
-        String txtKonto3bTickerText = data.getString(selectedKey,"txtKonto3bTicker");
-        if (txtKonto3bTickerText != null) {
-            txtKonto3bTicker.setText(txtKonto3bTickerText);
-        }
-        txtRebalancing3aPercent.setInt(data.getInteger(selectedKey, "txtRebalancing3aPercent"));
-        txtRebalancing3bPercent.setInt(data.getInteger(selectedKey, "txtRebalancing3bPercent"));
-        txtRebalancingThreshold.setInt(data.getInteger(selectedKey, "txtRebalancingThreshold"));
+    }
 
-        String txtAusgabeGrossText = data.getString(selectedKey, "txtAusgabeGross");
-        txtAusgabeGross.setText(Objects.requireNonNullElse(txtAusgabeGrossText, ""));
+    private String getAusgabeHtml() {
+        return (String)webViewAusgabe.getEngine().executeScript("document.documentElement.outerHTML");
+    }
 
-        recalculateAccount3();
-        updateTitle();
-        updateTransferred();
+    private void setAusgabeHtml(String html) {
+        final WebEngine webEngine = webViewAusgabe.getEngine();
+        webEngine.loadContent(html);
     }
 
     private void updateTransferred() {
@@ -990,46 +1043,46 @@ public class Application extends javafx.application.Application {
     }
 
     private void showText(ThreePotState newState) {
-        String ausgabeText = "";
+        String ausgabeHtml = "";
         if (newState.getChange().getFrom2To1() > 0 || newState.getChange().getFrom2To3() > 0) {
             int sellKonto2 = newState.getChange().getFrom2To1() + newState.getChange().getFrom2To3();
-            ausgabeText += String.format("Verkauf Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(sellKonto2));
+            ausgabeHtml += String.format("Verkauf Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(sellKonto2));
             if (newState.getChange().getFrom2To1() > 0) {
-                ausgabeText += "<ul><li>";
-                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom2To1()));
-                ausgabeText += "</li></ul>";
+                ausgabeHtml += "<ul><li>";
+                ausgabeHtml += String.format("Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom2To1()));
+                ausgabeHtml += "</li></ul>";
             }
             if (newState.getChange().getFrom2To3() > 0) {
-                ausgabeText += konto3KaufVerkaufText(Type.KAUF, newState.getChange().getFrom2To3(),
+                ausgabeHtml += konto3KaufVerkaufText(Type.KAUF, newState.getChange().getFrom2To3(),
                         newState.getChange().getChangeShares3a(), newState.getChange().getChangeShares3b());
             }
-            ausgabeText += "\n";
+            ausgabeHtml += "\n";
         }
         if (newState.getChange().getFrom3To1() > 0 || newState.getChange().getFrom3To2() > 0) {
             int sellKonto3 = newState.getChange().getFrom3To1() + newState.getChange().getFrom3To2();
-            ausgabeText += konto3KaufVerkaufText(Type.VERKAUF, sellKonto3,
+            ausgabeHtml += konto3KaufVerkaufText(Type.VERKAUF, sellKonto3,
                     newState.getChange().getChangeShares3a(), newState.getChange().getChangeShares3b());
-            ausgabeText += "<ul>";
+            ausgabeHtml += "<ul>";
             if (newState.getChange().getFrom3To1() > 0) {
-                ausgabeText += "<li>";
-                ausgabeText += String.format(" -> Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To1()));
-                ausgabeText += "</li>";
+                ausgabeHtml += "<li>";
+                ausgabeHtml += String.format("Einlage Konto 1: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To1()));
+                ausgabeHtml += "</li>";
             }
             if (newState.getChange().getFrom3To2() > 0) {
-                ausgabeText += "<li>";
-                ausgabeText += String.format(" -> Einlage Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To2()));
-                ausgabeText += "</li>";
+                ausgabeHtml += "<li>";
+                ausgabeHtml += String.format("Einlage Konto 2: %s CHF\n", FormatUtil.getDecimalFormatter().format(newState.getChange().getFrom3To2()));
+                ausgabeHtml += "</li>";
             }
-            ausgabeText += "<ul>";
-            ausgabeText += "\n";
+            ausgabeHtml += "<ul>";
+            ausgabeHtml += "\n";
         }
         if (newState.getChange().isChangedHighestPrice3a()) {
-            ausgabeText += String.format("Neuer Höchststand 3a: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3a()));
+            ausgabeHtml += String.format("Neuer Höchststand 3a: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3a()));
         }
         if (newState.getChange().isChangedHighestPrice3b()) {
-            ausgabeText += String.format("Neuer Höchststand 3b: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3b()));
+            ausgabeHtml += String.format("Neuer Höchststand 3b: %s CHF\n", FormatUtil.getDoubleFormatter().format(newState.getHighestPrice3b()));
         }
-        txtAusgabeGross.setText(ausgabeText);
+        setAusgabeHtml(ausgabeHtml);
     }
 
     private String konto3KaufVerkaufText(Type type, int sellBuyKonto3, int numOfShares3a, int numOfShares3b) {
@@ -1049,5 +1102,63 @@ public class Application extends javafx.application.Application {
                     FormatUtil.getDecimalFormatter().format(numOfShares3b));
         }
         return text;
+    }
+
+    private Configuration createNewConfiguration(String name) {
+        List<Configuration> existing = getCurrentSession()
+                .read(Configuration.class, null, List.of(DatabaseSession.Param.of("name", name)));
+        if (existing != null && !existing.isEmpty()) {
+            return existing.getFirst();
+        }
+
+        Configuration configuration = new Configuration();
+        configuration.setName(name);
+        configuration.setSetting(new Setting());
+        configuration.setLastAccount(new Account());
+        configuration.setNewAccount(new Account());
+        configuration.setCurrentAccount(new Account());
+        fillValues(configuration);
+        try {
+            getCurrentSession().insert(configuration);
+        } catch(DatabaseException dbEx) {
+            MessageDialog.showError(this.dialogStage, "Insert Fehler", dbEx.getMessage());
+        }
+        return configuration;
+    }
+
+    private void update(Configuration configuration) {
+        if (configuration != null) {
+            fillValues(configuration);
+            try {
+                getCurrentSession().update(configuration);
+            } catch (DatabaseException dbEx) {
+                MessageDialog.showError(this.dialogStage, "Update Fehler", dbEx.getMessage());
+            }
+        }
+    }
+
+    private void delete(Configuration configuration) {
+        if (configuration != null) {
+            try {
+                getCurrentSession().delete(configuration);
+            } catch (DatabaseException dbEx) {
+                MessageDialog.showError(this.dialogStage, "Delete Fehler", dbEx.getMessage());
+            }
+        }
+    }
+
+    private List<Configuration> getConfigurations() {
+        return getCurrentSession().readAll(Configuration.class, List.of("name"));
+    }
+
+    private Optional<Configuration> getConfiguration(long id) {
+        return getCurrentSession().readByPK(Configuration.class, id);
+    }
+
+    private DatabaseSession getCurrentSession() {
+        if (this.currentSession == null || !this.currentSession.isConnected()) {
+            this.currentSession = DatabaseManager.openSession();
+        }
+        return this.currentSession;
     }
 }

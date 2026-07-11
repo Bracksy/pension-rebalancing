@@ -45,8 +45,8 @@ public class Data {
 		getPreferences(configuration).put(pKey, pValue);
 	}
 
-	public Integer getInteger(final String configuration,final String pKey) {
-		int value = getPreferences(configuration).getInt(pKey, UNDEFINED);
+	public Long getLong(final String configuration,final String pKey) {
+		long value = getPreferences(configuration).getLong(pKey, UNDEFINED);
 		if (value == UNDEFINED) {
 			return null;
 		}

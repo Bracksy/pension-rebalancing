@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/database/rebalance.lock.db
+/database/rebalance.mv.db
+/database/rebalance.trace.db

@@ -1,7 +1,9 @@
 package ch.immi.pension;
 
+import javafx.application.Application;
+
 public class Launcher {
     public static void main(String[] args) {
-        javafx.application.Application.launch(Application.class, args);
+        Application.launch(StartUp.class, args);
     }
 }

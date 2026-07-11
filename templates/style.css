@@ -97,6 +97,7 @@ input[type="text"]:disabled {
     cursor: not-allowed;
     border-radius: 4px;
     box-sizing: border-box;
+    text-align: right;
 }
 
 /* Leere Platzhalter-Zellen */
@@ -123,4 +124,61 @@ input[type="text"]:disabled {
 ul {
     padding-left: 20px;
     line-height: 1.6;
+}
+
+/* Verhindert extremes Quetschen der Seite, da wir jetzt zwei Blöcke haben */
+html, body {
+    height: auto;
+    background-color: #eaeaea; /* Ein leicht dunklerer Hintergrund hebt die Blöcke hervor */
+    padding: 20px 0;
+}
+
+/* Neuer Klassen-Selektor für die Abschnitte */
+.page-section {
+    background-color: #ffffff;
+    max-width: 1400px; /* Begrenzt die Breite auf großen Bildschirmen für bessere Lesbarkeit */
+    margin: 0 auto;    /* Zentriert den gesamten Block */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Gibt den Blöcken Tiefe */
+}
+
+/* Entfernt die alte reine Border-Linie */
+.page-section + .page-section {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Erhöht den Abstand zwischen den Blöcken auf der Seite */
+.page-section {
+    margin-bottom: 60px;
+}
+
+/* Das neue Trennelement, das sich über alle 3 Spalten des Hauptgrids spannt */
+.block-divider {
+    grid-column: 1 / 4; /* Wichtig: Spannt die Linie über die ganze Breite */
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding: 20px 25px 0 25px; /* Abstand zu den Seiten und nach oben */
+    color: #555;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+/* Erzeugt die grauen Linien links und rechts vom Datum */
+.block-divider::before,
+.block-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 3px solid #bbb; /* Deine gewünschte graue Linie */
+}
+
+/* Abstand zwischen den Linien und dem Text in der Mitte */
+.block-divider::before {
+    margin-right: 20px;
+}
+
+.block-divider::after {
+    margin-left: 20px;
 }

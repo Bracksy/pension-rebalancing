@@ -8,9 +8,15 @@ import java.text.DecimalFormat;
 
 public abstract class AbstractTextField extends TextField {
     private final int maxLength;
+    private final boolean showZero;
 
     public AbstractTextField(int width, int length, String hint, boolean readonly) {
-        maxLength = length;
+        this(width, length, hint, readonly, true);
+    }
+
+    public AbstractTextField(int width, int length, String hint, boolean readonly, boolean showZero) {
+        this.maxLength = length;
+        this.showZero = showZero;
         if (hint != null) {
             setPromptText(hint);
         }
@@ -26,6 +32,13 @@ public abstract class AbstractTextField extends TextField {
                 } else {
                     removeFormatting();
                 }
+            }
+            if (newVal) {
+                Platform.runLater(() -> {
+                    if (!getText().isEmpty()) {
+                        selectAll();
+                    }
+                });
             }
         });
 
@@ -105,6 +118,10 @@ public abstract class AbstractTextField extends TextField {
         } else {
             setStyle("-fx-control-inner-background: #FFFFFF");
         }
+    }
+
+    protected boolean isShowZero() {
+        return this.showZero;
     }
 
     private String removeFormatting(String text) {

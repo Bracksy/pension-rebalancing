@@ -1,45 +1,37 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erweitertes Grid-Layout mit 6 Spalten</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<div class="grid-container page-section">
 
-<div class="grid-container">
+    <div class="block-divider">DATE_TIME</div>
 
     <!-- Oben Links -->
     <div class="upper-left">
-        <h2>Aktueller Kontostand: 3'565 CHF</h2>
+        <h2>Aktueller Kontostand: CURRENT_BALANCE CHF</h2>
         <div class="form-grid">
             <!-- Zeile 1 -->
             <label for="ul-k1">Konto 1</label>
             <div class="empty-cell"></div>
             <div class="empty-cell"></div>
-            <input type="text" id="ul-k1" value="0" disabled>
+            <input type="text" id="ul-k1" value="CURRENT_ACCOUNT_1" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 2 -->
             <label for="ul-k2">Konto 2</label>
             <div class="empty-cell"></div>
             <div class="empty-cell"></div>
-            <input type="text" id="ul-k2" value="1'000" disabled>
+            <input type="text" id="ul-k2" value="CURRENT_ACCOUNT_2" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 3 -->
             <label for="ul-k3a">Konto 3a</label>
-            <input type="text" id="ul-k3a-sub1" value="27" disabled>
-            <input type="text" id="ul-k3a-sub2" value="95.00" disabled>
-            <input type="text" id="ul-k3a-main" value="2'565" disabled>
+            <input type="text" id="ul-k3a-sub1" value="CURRENT_AMOUNT_3A" disabled>
+            <input type="text" id="ul-k3a-sub2" value="CURRENT_PRICE_3A" disabled>
+            <input type="text" id="ul-k3a-main" value="CURRENT_ACCOUNT_3A" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 4 -->
             <label for="ul-k3b">Konto 3b</label>
-            <input type="text" id="ul-k3b-sub1" value="0" disabled>
-            <input type="text" id="ul-k3b-sub2" value=".00" disabled>
-            <input type="text" id="ul-k3b-main" value="0" disabled>
+            <input type="text" id="ul-k3b-sub1" value="CURRENT_AMOUNT_3B" disabled>
+            <input type="text" id="ul-k3b-sub2" value="CURRENT_PRICE_3B" disabled>
+            <input type="text" id="ul-k3b-main" value="CURRENT_ACCOUNT_3B" disabled>
             <span class="currency-label">CHF</span>
         </div>
     </div>
@@ -51,34 +43,34 @@
 
     <!-- Oben Rechts -->
     <div class="upper-right">
-        <h2>Neuer Kontostand: 3'565 CHF</h2>
+        <h2>Neuer Kontostand: NEW_BALANCE CHF</h2>
         <div class="form-grid">
             <!-- Zeile 1 -->
             <label for="ur-k1">Konto 1</label>
             <div class="empty-cell"></div>
             <div class="empty-cell"></div>
-            <input type="text" id="ur-k1" value="760" disabled>
+            <input type="text" id="ur-k1" value="NEW_ACCOUNT_1" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 2 -->
             <label for="ur-k2">Konto 2</label>
             <div class="empty-cell"></div>
             <div class="empty-cell"></div>
-            <input type="text" id="ur-k2" value="1'285" disabled>
+            <input type="text" id="ur-k2" value="NEW_ACCOUNT_2" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 3 -->
             <label for="ur-k3a">Konto 3a</label>
-            <input type="text" id="ur-k3a-sub1" value="16" disabled>
-            <input type="text" id="ur-k3a-sub2" value="95.00" disabled>
-            <input type="text" id="ur-k3a-main" value="1'520" disabled>
+            <input type="text" id="ur-k3a-sub1" value="NEW_AMOUNT_3A" disabled>
+            <input type="text" id="ur-k3a-sub2" value="NEW_PRICE_3A" disabled>
+            <input type="text" id="ur-k3a-main" value="NEW_ACCOUNT_3A" disabled>
             <span class="currency-label">CHF</span>
 
             <!-- Zeile 4 -->
             <label for="ur-k3b">Konto 3b</label>
-            <input type="text" id="ur-k3b-sub1" value="0" disabled>
-            <input type="text" id="ur-k3b-sub2" value=".00" disabled>
-            <input type="text" id="ur-k3b-main" value="0" disabled>
+            <input type="text" id="ur-k3b-sub1" value="NEW_AMOUNT_3B" disabled>
+            <input type="text" id="ur-k3b-sub2" value="NEW_PRICE_3B" disabled>
+            <input type="text" id="ur-k3b-main" value="NEW_ACCOUNT_3B" disabled>
             <span class="currency-label">CHF</span>
         </div>
     </div>
@@ -86,13 +78,6 @@
     <!-- Unterer Bereich -->
     <div class="lower">
         <h3>Rebalancing</h3>
-        Verkauf Konto 3: 1'045 CHF (3a: -11 ETF)
-<ul><li> -> Einlage Konto 1: 760 CHF
-</li><li> -> Einlage Konto 2: 285 CHF
-</li><ul>
-
+        REBALANCING_OUTPUT
     </div>
 </div>
-
-</body>
-</html>
